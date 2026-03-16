@@ -72,6 +72,16 @@ document.addEventListener('DOMContentLoaded', () => {
             
             if (response.ok && result.status === 'success') {
                 const analysis = result.analysis;
+
+                // Show nearby rescues section and embed map (LA metro area)
+                const nearbySection = document.getElementById('nearbyRescuesSection');
+                const rescuesMap = document.getElementById('rescuesMap');
+                if (nearbySection && rescuesMap) {
+                    nearbySection.classList.remove('hidden');
+                    // Center on LA metro so all 5 rescues (Downey, Pasadena, Bell Gardens, Studio City) are in view
+                    rescuesMap.src = `https://www.google.com/maps?q=34.05,-118.24&z=10&output=embed`;
+                }
+
                 const severityColors = {
                     'Low': 'bg-yellow-100 text-yellow-800 border-yellow-200',
                     'Medium': 'bg-orange-100 text-orange-800 border-orange-200',

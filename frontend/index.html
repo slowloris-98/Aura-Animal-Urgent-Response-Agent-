@@ -54,6 +54,72 @@
                     <h3 class="font-bold text-lg text-gray-800 mb-2">Agent Response</h3>
                     <div id="responseText" class="text-sm text-gray-600">Waiting for AI...</div>
                 </div>
+
+                <!-- Nearby rescues (shown after successful alert) -->
+                <div id="nearbyRescuesSection" class="hidden">
+                    <div class="bg-gray-800 text-white p-4 rounded-lg border border-gray-700">
+                        <h3 class="font-bold text-lg mb-1">Nearby rescues</h3>
+                        <p class="text-xs text-gray-400 mb-4">Map (5 rescuers near you)</p>
+                        <div class="space-y-4 text-sm">
+                            <div class="flex gap-3">
+                                <span class="text-red-500 flex-shrink-0" aria-hidden="true">📍</span>
+                                <div>
+                                    <p class="font-semibold">Southeast Area Animal Control Authority</p>
+                                    <p class="text-gray-300 flex items-center gap-2 mt-1"><span>📍</span> 9777 Seaaca St, Downey</p>
+                                    <p class="text-gray-300 flex items-center gap-2"><span>📞</span> <a href="tel:+15628033301" class="text-emerald-400 hover:underline">+1 562-803-3301</a></p>
+                                    <p class="text-gray-400 text-xs mt-1">(serves Vernon area)</p>
+                                    <span class="inline-block mt-1 px-2 py-0.5 bg-gray-700 rounded text-xs">SEAACA</span>
+                                </div>
+                            </div>
+                            <div class="flex gap-3">
+                                <span class="text-red-500 flex-shrink-0" aria-hidden="true">📍</span>
+                                <div>
+                                    <p class="font-semibold">Downey Animal Care Center</p>
+                                    <p class="text-gray-300 flex items-center gap-2 mt-1"><span>📍</span> 11258 Garfield Ave, Downey</p>
+                                    <p class="text-gray-300 flex items-center gap-2"><span>📞</span> <a href="tel:+15629406898" class="text-emerald-400 hover:underline">+1 562-940-6898</a></p>
+                                </div>
+                            </div>
+                            <div class="flex gap-3">
+                                <span class="text-red-500 flex-shrink-0" aria-hidden="true">📍</span>
+                                <div>
+                                    <p class="font-semibold">Miracle Dog Rescue</p>
+                                    <p class="text-gray-300 flex items-center gap-2 mt-1"><span>📍</span> 6639 Ajax Ave, Bell Gardens</p>
+                                    <p class="text-gray-300 flex items-center gap-2"><span>📞</span> <a href="tel:+13233838883" class="text-emerald-400 hover:underline">+1 323-383-8883</a></p>
+                                </div>
+                            </div>
+                            <div class="flex gap-3">
+                                <span class="text-red-500 flex-shrink-0" aria-hidden="true">📍</span>
+                                <div>
+                                    <p class="font-semibold">Pasadena Humane</p>
+                                    <p class="text-gray-300 flex items-center gap-2 mt-1"><span>📍</span> 361 S Raymond Ave, Pasadena</p>
+                                    <p class="text-gray-300 flex items-center gap-2"><span>📞</span> <a href="tel:+16267927151" class="text-emerald-400 hover:underline">+1 626-792-7151</a></p>
+                                </div>
+                            </div>
+                            <div class="flex gap-3">
+                                <span class="text-red-500 flex-shrink-0" aria-hidden="true">📍</span>
+                                <div>
+                                    <p class="font-semibold">Hope For Paws</p>
+                                    <p class="text-gray-300 flex items-center gap-2 mt-1"><span>📍</span> 3940 Laurel Canyon Blvd, Studio City</p>
+                                    <p class="text-gray-300 mt-1"><a href="https://hopeforpaws.org" target="_blank" rel="noopener" class="text-emerald-400 hover:underline">hopeforpaws.org</a></p>
+                                    <span class="inline-block mt-1 px-2 py-0.5 bg-gray-700 rounded text-xs">Hope For Paws</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mt-4 rounded-lg overflow-hidden border border-gray-300 shadow-md" style="height: 320px;">
+                        <iframe
+                            id="rescuesMap"
+                            title="Nearby animal rescues map"
+                            src=""
+                            width="100%"
+                            height="100%"
+                            style="border:0; min-height: 320px;"
+                            allowfullscreen=""
+                            loading="lazy"
+                            referrerpolicy="no-referrer-when-downgrade">
+                        </iframe>
+                    </div>
+                </div>
             </div>
         </main>
     </div>
