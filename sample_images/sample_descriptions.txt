@@ -1,0 +1,32 @@
+### Dogs (Domestic / Animal Control Routing)
+
+**Medium Severity:**
+"I found a medium-sized stray mix running loose near the park entrance. He doesn't have a collar and seems very disoriented and scared, but he doesn't appear visibly injured. He's hiding under a park bench now."
+
+**High Severity:**
+"There's a Golden Retriever tied up outside the grocery store. It's 95 degrees out and the dog has no water. He's panting heavily and looks extremely lethargic. I think he might be getting heatstroke."
+
+**Critical Severity:**
+"A small stray poodle just got clipped by a car on Main Street. The car didn't stop. The dog is lying on the side of the road, conscious but bleeding from its back leg and unable to stand up. Traffic is still moving around it."
+
+### Deer (Wildlife / NGO Routing)
+
+**Medium Severity:**
+"There is a young deer wandering around the fenced-in playground area behind the elementary school. It looks healthy but it seems completely trapped and is getting stressed trying to find a way back out to the woods."
+
+**High Severity:**
+"I just spotted a large buck on the edge of the highway median. It looks like it might have a broken front leg—it's limping badly and struggling to put weight on it, but it's still trying to move toward the road."
+
+**Critical Severity:**
+"A deer was just hit by a truck on Route 9. It's lying partially in the right lane. It is still alive and thrashing around trying to get up, which is incredibly dangerous for the oncoming traffic and the animal."
+
+### Birds (Wildlife / Avian Rescue Routing)
+
+**Medium Severity:**
+"I found a baby bird on the sidewalk under a large oak tree. It doesn't have all its feathers yet. It's moving around a little bit but it obviously can't fly, and there are a lot of stray cats in this neighborhood."
+
+**High Severity:**
+"There is a large hawk sitting on the ground in my backyard. It's been there for over an hour. When I got closer, it tried to fly away but its right wing seems to be hanging at an awkward angle, like it might be broken."
+
+**Critical Severity:**
+"I'm at the local duck pond and there is a swan that is violently choking or thrashing. It looks like it has fishing line or a plastic ring completely wrapped around its neck and beak. It's struggling to breathe and is in severe distress."
