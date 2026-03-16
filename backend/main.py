@@ -31,7 +31,7 @@ if not NVIDIA_API_KEY:
 
 client = OpenAI(
   base_url="https://integrate.api.nvidia.com/v1",
-  api_key=NVIDIA_API_KEY
+  api_key="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"
 )
 
 @app.get("/")
@@ -77,9 +77,19 @@ async def submit_report(
           max_tokens=500
         )
         
-        # Parse the JSON response from the agent
-        ai_response_text = completion.choices[0].message.content
-        ai_analysis = json.loads(ai_response_text)
+        # Parse the JSON response from the agent (strip markdown code blocks if present)
+        ai_response_text = completion.choices[0].message.content or "{}"
+        text = ai_response_text.strip()
+        if text.startswith("```"):
+            lines = text.split("\n")
+            if lines[0].startswith("```json"):
+                lines = lines[1:]
+            elif lines[0].startswith("```"):
+                lines = lines[1:]
+            if lines and lines[-1].strip() == "```":
+                lines = lines[:-1]
+            text = "\n".join(lines)
+        ai_analysis = json.loads(text)
 
         # Save to CSV
         csv_file = "alerts.csv"

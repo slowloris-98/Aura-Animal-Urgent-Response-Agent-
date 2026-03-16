@@ -62,25 +62,28 @@ document.addEventListener('DOMContentLoaded', () => {
             formData.append('image', imageFile);
         }
 
+        // Always show nearby rescues + map when user clicks Alert Rescue Agent
+        function showNearbyRescues() {
+            const nearbySection = document.getElementById('nearbyRescuesSection');
+            const rescuesMap = document.getElementById('rescuesMap');
+            if (nearbySection && rescuesMap) {
+                nearbySection.classList.remove('hidden');
+                rescuesMap.src = 'https://www.google.com/maps?q=34.05,-118.24&z=10&output=embed';
+            }
+        }
+
         try {
             // Pointing to our FastAPI backend
             const response = await fetch('http://localhost:8000/api/report', {
                 method: 'POST',
                 body: formData
             });
-            const result = await response.json();
+            const result = await response.json().catch(() => ({}));
             
             if (response.ok && result.status === 'success') {
                 const analysis = result.analysis;
 
-                // Show nearby rescues section and embed map (LA metro area)
-                const nearbySection = document.getElementById('nearbyRescuesSection');
-                const rescuesMap = document.getElementById('rescuesMap');
-                if (nearbySection && rescuesMap) {
-                    nearbySection.classList.remove('hidden');
-                    // Center on LA metro so all 5 rescues (Downey, Pasadena, Bell Gardens, Studio City) are in view
-                    rescuesMap.src = `https://www.google.com/maps?q=34.05,-118.24&z=10&output=embed`;
-                }
+                showNearbyRescues();
 
                 const severityColors = {
                     'Low': 'bg-yellow-100 text-yellow-800 border-yellow-200',
@@ -91,17 +94,19 @@ document.addEventListener('DOMContentLoaded', () => {
                 
                 const sevColor = severityColors[analysis.severity] || severityColors['Medium'];
 
-                let tipsHtml = analysis.tips.map(tip => `<li class="flex items-start gap-2"><svg class="w-5 h-5 text-emerald-500 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg><span>${tip}</span></li>`).join('');
+                let tipsHtml = (analysis.tips || []).map(tip => `<li class="flex items-start gap-2"><svg class="w-5 h-5 text-emerald-500 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg><span>${tip}</span></li>`).join('');
+
+                const loc = result.data && result.data.location ? result.data.location : { lat: lat, lng: lng };
 
                 responseText.innerHTML = `
                     <div class="space-y-4">
                         <!-- Header / Classification -->
                         <div class="flex items-center justify-between border-b pb-3">
                             <div>
-                                <h4 class="font-bold text-gray-800 text-lg">${analysis.classification}</h4>
+                                <h4 class="font-bold text-gray-800 text-lg">${analysis.classification || 'Animal'}</h4>
                                 <p class="text-xs text-gray-500">AI Classification</p>
                             </div>
-                            <span class="px-3 py-1 rounded-full text-xs border uppercase tracking-wider ${sevColor}">${analysis.severity} SEVERITY</span>
+                            <span class="px-3 py-1 rounded-full text-xs border uppercase tracking-wider ${sevColor}">${(analysis.severity || 'Medium')} SEVERITY</span>
                         </div>
 
                         <!-- Routing Alert -->
@@ -111,7 +116,7 @@ document.addEventListener('DOMContentLoaded', () => {
                             </div>
                             <div>
                                 <p class="text-sm font-semibold text-blue-900">Authorities Notified</p>
-                                <p class="text-xs text-blue-700 mt-1">Initiated protocol: <strong>${analysis.routing}</strong> near location (${result.data.location.lat.toFixed(3)}, ${result.data.location.lng.toFixed(3)}).</p>
+                                <p class="text-xs text-blue-700 mt-1">Initiated protocol: <strong>${analysis.routing || 'Alerting Animal Control / Rescue'}</strong> near location (${Number(loc.lat).toFixed(3)}, ${Number(loc.lng).toFixed(3)}).</p>
                             </div>
                         </div>
 
@@ -126,12 +131,24 @@ document.addEventListener('DOMContentLoaded', () => {
                     </div>
                 `;
             } else {
-                 responseText.innerHTML = '<span class="text-red-500 font-medium">Server processed the request but returned an error. Check logs.</span>';
+                showNearbyRescues();
+                responseText.innerHTML = `
+                    <div class="space-y-3">
+                        <p class="text-amber-700 font-medium">AI analysis is temporarily unavailable.</p>
+                        <p class="text-sm text-gray-600">Below are nearby rescues you can contact right away.</p>
+                    </div>
+                `;
             }
             
         } catch (error) {
             console.error('Submission error:', error);
-            responseText.innerHTML = '<span class="text-red-500 font-medium">Error connecting to the server. Please ensure the backend is running.</span>';
+            showNearbyRescues();
+            responseText.innerHTML = `
+                <div class="space-y-3">
+                    <p class="text-amber-700 font-medium">Could not reach the server.</p>
+                    <p class="text-sm text-gray-600">Below are nearby rescues you can contact. Ensure the backend is running for AI analysis.</p>
+                </div>
+            `;
         } finally {
             submitBtn.disabled = false;
             submitBtn.classList.remove('opacity-50', 'cursor-not-allowed');
