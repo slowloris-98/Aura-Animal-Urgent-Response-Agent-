@@ -1,62 +1,620 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="scroll-smooth">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Aura - Animal Urgent Response Agent</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0"/>
+  <title>Aura AI — Animal Urgent Response Agent</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet"/>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: { sans: ['Inter', 'system-ui', 'sans-serif'] },
+          animation: {
+            'fade-in':  'fadeIn 0.5s ease-out',
+            'slide-up': 'slideUp 0.45s ease-out both',
+          },
+          keyframes: {
+            fadeIn:  { '0%': { opacity: '0' },                              '100%': { opacity: '1' } },
+            slideUp: { '0%': { transform: 'translateY(22px)', opacity: '0' }, '100%': { transform: 'translateY(0)', opacity: '1' } },
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    body { -webkit-tap-highlight-color: transparent; }
+
+    /* ── Teal palette ─────────────────────────────── */
+    :root {
+      --t50:  #F0FDFA;
+      --t100: #CCFBF1;
+      --t200: #99F6E4;
+      --t400: #2DD4BF;
+      --t500: #14B8A6;
+      --t600: #0D9488;
+      --t700: #0F766E;
+      --t800: #115E59;
+      --t900: #134E4A;
+    }
+
+    /* ── Gradients ────────────────────────────────── */
+    .hero-bg  { background: linear-gradient(150deg, var(--t900) 0%, var(--t800) 40%, var(--t700) 100%); }
+    .g-teal   { background: linear-gradient(135deg, var(--t500), var(--t700)); }
+    .g-teal2  { background: linear-gradient(135deg, var(--t400), var(--t600)); }
+    .g-amber  { background: linear-gradient(135deg, #D97706, #B45309); }
+    .g-coral  { background: linear-gradient(135deg, #C05621, #9A3412); }
+    .g-green  { background: linear-gradient(135deg, #276749, #166534); }
+    .g-purple { background: linear-gradient(135deg, #6D28D9, #5B21B6); }
+
+    /* ── Severity ─────────────────────────────────── */
+    .sev-low      { background: linear-gradient(135deg,#276749,#166534); box-shadow:0 0 12px rgba(39,103,73,.25); }
+    .sev-medium   { background: linear-gradient(135deg,#B45309,#92400E); box-shadow:0 0 12px rgba(180,83,9,.28); }
+    .sev-high     { background: linear-gradient(135deg,#C05621,#9A3412); box-shadow:0 0 16px rgba(192,86,33,.32); }
+    .sev-critical { background: linear-gradient(135deg,#B91C1C,#7F1D1D); box-shadow:0 0 20px rgba(185,28,28,.45); }
+
+    @keyframes pulseRing {
+      0%   { transform:scale(.85); opacity:.9; }
+      100% { transform:scale(1.55); opacity:0; }
+    }
+    .pulse-ring::before {
+      content:''; position:absolute; inset:-5px; border-radius:inherit;
+      background:rgba(185,28,28,.3);
+      animation:pulseRing 1.6s ease-out infinite;
+    }
+
+    /* ── Cards ────────────────────────────────────── */
+    .card {
+      background: #ffffff;
+      border: 1px solid #CCFBF1;
+      box-shadow: 0 2px 16px rgba(13,148,136,.07), 0 1px 3px rgba(13,148,136,.05);
+    }
+    .hero-card {
+      background: rgba(255,255,255,.10);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(255,255,255,.18);
+    }
+
+    /* ── Upload zone ──────────────────────────────── */
+    .upload-zone { transition: border-color .2s, background .2s; }
+    .upload-zone:hover, .upload-zone.dragover {
+      border-color: var(--t500);
+      background: rgba(20,184,166,.04);
+    }
+
+    /* ── Focus ────────────────────────────────────── */
+    textarea:focus {
+      outline: none;
+      border-color: var(--t500) !important;
+      box-shadow: 0 0 0 3px rgba(20,184,166,.18);
+    }
+    button:focus-visible { outline: 2px solid var(--t500); outline-offset: 2px; }
+
+    /* ── Tip stagger ──────────────────────────────── */
+    .tip-item { animation: slideUp .4s ease-out both; }
+    .tip-item:nth-child(1) { animation-delay: .05s; }
+    .tip-item:nth-child(2) { animation-delay: .15s; }
+    .tip-item:nth-child(3) { animation-delay: .25s; }
+
+    /* ── Scrollbar ────────────────────────────────── */
+    ::-webkit-scrollbar { width: 4px; }
+    ::-webkit-scrollbar-thumb { background: #CCFBF1; border-radius: 2px; }
+
+    /* ── Spinner ──────────────────────────────────── */
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .spin { animation: spin .75s linear infinite; }
+
+    /* ── Toast ────────────────────────────────────── */
+    @keyframes toastIn {
+      0%   { transform: translateX(-50%) translateY(20px); opacity: 0; }
+      100% { transform: translateX(-50%) translateY(0);    opacity: 1; }
+    }
+    .toast { animation: toastIn .3s ease-out; }
+
+    /* ── Divider ──────────────────────────────────── */
+    .teal-divider { border-color: #CCFBF1; }
+
+    /* ── Desktop 2-col grid ───────────────────────── */
+    @media (min-width: 900px) {
+      .form-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1.5rem;
+        align-items: start;
+      }
+      .form-grid .form-col { /* left column */ }
+      .form-grid .side-col { /* right column */ }
+    }
+  </style>
 </head>
-<body class="bg-gray-100 min-h-screen font-sans">
-    <div class="max-w-md mx-auto bg-white min-h-screen shadow-lg relative">
-        <header class="bg-emerald-600 text-white p-4 sticky top-0 z-10">
-            <h1 class="text-2xl font-bold text-center">Aura Rescue</h1>
-            <p class="text-sm text-center opacity-80">Urgent Animal Response Agent</p>
-        </header>
 
-        <main class="p-4 pb-24">
-            <form id="reportForm" class="space-y-6">
-                <!-- Camera Capture -->
-                <div class="space-y-2">
-                    <label class="block text-sm font-medium text-gray-700">Capture Animal Photo</label>
-                    <input type="file" id="imageInput" accept="image/*" capture="environment" 
-                        class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-emerald-50 file:text-emerald-700 hover:file:bg-emerald-100 border border-gray-300 rounded-md p-2">
-                </div>
+<body class="font-sans bg-[#F0FDFA] text-teal-900 antialiased">
 
-                <!-- Description -->
-                <div class="space-y-2">
-                    <label class="block text-sm font-medium text-gray-700">Condition Description</label>
-                    <textarea id="descriptionInput" rows="3" required
-                        class="w-full p-3 border border-gray-300 rounded-md focus:ring-emerald-500 focus:border-emerald-500"
-                        placeholder="E.g., Found an injured stray dog, seems to have a broken leg..."></textarea>
-                </div>
+<!-- ═══════════════════════════════════════════════════
+     HERO
+═══════════════════════════════════════════════════ -->
+<section id="heroSection" class="hero-bg relative overflow-hidden">
 
-                <!-- Location & GPS -->
-                <div class="space-y-2">
-                    <button type="button" id="getLocationBtn" 
-                        class="w-full bg-blue-100 text-blue-700 py-2 px-4 rounded-md font-medium hover:bg-blue-200 transition flex items-center justify-center gap-2">
-                        <span>📍 Get Current Location</span>
-                    </button>
-                    <p id="locationStatus" class="text-xs text-gray-500 text-center mt-1"></p>
-                    <input type="hidden" id="latInput">
-                    <input type="hidden" id="lngInput">
-                </div>
+  <!-- Decorative blobs — teal tones only -->
+  <div class="pointer-events-none absolute inset-0 overflow-hidden">
+    <div class="absolute -top-24 -right-24 w-72 h-72 rounded-full blur-3xl opacity-20" style="background:#2DD4BF"></div>
+    <div class="absolute bottom-0 -left-16 w-64 h-64 rounded-full blur-3xl opacity-10" style="background:#99F6E4"></div>
+    <div class="absolute top-1/2 right-1/4 w-48 h-48 rounded-full blur-3xl opacity-10" style="background:#14B8A6"></div>
+  </div>
 
-                <!-- Submit -->
-                <button type="submit" id="submitBtn"
-                    class="w-full bg-emerald-600 text-white py-3 px-4 rounded-md font-bold text-lg shadow-md hover:bg-emerald-700 transition flex items-center justify-center gap-2">
-                    🚨 Alert Rescue Agent
-                </button>
-            </form>
-            
-            <!-- Loading/Results Area -->
-            <div id="resultsArea" class="mt-8 hidden space-y-4 border-t pt-4">
-                <div class="bg-gray-50 p-4 rounded-lg border border-gray-200">
-                    <h3 class="font-bold text-lg text-gray-800 mb-2">Agent Response</h3>
-                    <div id="responseText" class="text-sm text-gray-600">Waiting for AI...</div>
-                </div>
-            </div>
-        </main>
+  <div class="relative max-w-5xl mx-auto px-6 pt-10 pb-12">
+
+    <!-- Navbar -->
+    <div class="flex items-center justify-between mb-12">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 g-teal2 rounded-[14px] flex items-center justify-center shadow-lg">
+          <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
+              d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
+          </svg>
+        </div>
+        <div>
+          <p class="text-white font-extrabold text-[1.1rem] leading-none tracking-tight">Aura AI</p>
+          <p class="text-teal-300 text-[0.68rem] mt-0.5">Animal Response System</p>
+        </div>
+      </div>
+      <span class="bg-white/10 border border-white/20 text-[0.72rem] text-teal-100 font-semibold px-3 py-1.5 rounded-full flex items-center gap-1.5">
+        <span class="w-1.5 h-1.5 bg-teal-300 rounded-full animate-pulse"></span> Active
+      </span>
     </div>
-    <script src="app.js"></script>
+
+    <!-- Hero content — 2-column on desktop -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-10 items-center">
+
+      <!-- Left: Copy + CTAs -->
+      <div>
+        <p class="text-[0.7rem] font-extrabold text-teal-300 uppercase tracking-[0.2em] mb-3">AI-Powered Animal Rescue</p>
+        <h1 class="text-[2.9rem] font-black text-white leading-[1.05] tracking-tight mb-5">
+          Every second<br/>
+          <span class="text-teal-300">matters.</span>
+        </h1>
+        <p class="text-teal-100 text-[0.95rem] leading-relaxed mb-8 max-w-sm">
+          Describe what you see — Aura analyses the situation, grades urgency, routes help to the right authority, and gives you safe immediate guidance.
+        </p>
+        <div class="flex flex-col sm:flex-row gap-3">
+          <button onclick="scrollToReport()"
+            class="g-teal2 text-white py-4 px-7 rounded-2xl font-bold text-[0.95rem] shadow-lg flex items-center justify-center gap-2.5 active:scale-[.97] transition-transform">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
+                d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.34 16.5c-.77.833.192 2.5 1.732 2.5z"/>
+            </svg>
+            Report an Animal
+          </button>
+          <button onclick="scrollToHowItWorks()"
+            class="bg-white/10 border border-white/25 text-white py-3.5 px-6 rounded-2xl font-semibold text-sm flex items-center justify-center gap-2 active:scale-[.97] transition-transform">
+            How It Works
+            <svg class="w-4 h-4 text-teal-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- Right: Sample AI result card -->
+      <div class="hero-card rounded-3xl p-5">
+        <div class="flex items-center gap-2 mb-4">
+          <span class="w-2 h-2 bg-teal-300 rounded-full animate-pulse"></span>
+          <span class="text-[0.68rem] text-teal-200 font-bold uppercase tracking-widest">Live Example · AI Triage</span>
+        </div>
+        <div class="flex items-start justify-between gap-3 mb-4">
+          <div class="flex items-center gap-3">
+            <div class="w-11 h-11 bg-white/10 rounded-2xl flex items-center justify-center text-2xl border border-white/10">🐕</div>
+            <div>
+              <p class="text-white font-bold text-[0.95rem]">Injured Stray Dog</p>
+              <p class="text-teal-200 text-xs mt-0.5">Domestic · Limping · Distressed</p>
+            </div>
+          </div>
+          <span class="relative sev-high text-white text-[0.68rem] font-black px-3 py-1.5 rounded-full uppercase tracking-wider flex items-center gap-1.5 flex-shrink-0">
+            <span class="w-1.5 h-1.5 bg-white rounded-full animate-pulse"></span> High
+          </span>
+        </div>
+        <div class="bg-white/10 border border-white/10 rounded-2xl px-3.5 py-2.5 mb-4 flex items-center gap-2.5">
+          <svg class="w-4 h-4 text-teal-300 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
+          </svg>
+          <p class="text-xs text-teal-100">Routing to <span class="text-white font-semibold">Animal Control & Rescue</span></p>
+        </div>
+        <div class="space-y-2">
+          <p class="text-[0.65rem] font-bold text-teal-300 uppercase tracking-widest">Immediate Steps</p>
+          <div class="flex items-start gap-2.5">
+            <span class="w-5 h-5 g-teal2 rounded-full flex items-center justify-center text-white text-[0.62rem] font-black flex-shrink-0 mt-0.5">1</span>
+            <p class="text-xs text-teal-100">Keep a safe distance — do not approach directly.</p>
+          </div>
+          <div class="flex items-start gap-2.5">
+            <span class="w-5 h-5 g-teal2 rounded-full flex items-center justify-center text-white text-[0.62rem] font-black flex-shrink-0 mt-0.5">2</span>
+            <p class="text-xs text-teal-100">Document the location and photograph if safely possible.</p>
+          </div>
+          <div class="flex items-start gap-2.5">
+            <span class="w-5 h-5 g-teal2 rounded-full flex items-center justify-center text-white text-[0.62rem] font-black flex-shrink-0 mt-0.5">3</span>
+            <p class="text-xs text-teal-100">Stay nearby until the rescue team arrives.</p>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+
+<!-- ═══════════════════════════════════════════════════
+     HOW IT WORKS
+═══════════════════════════════════════════════════ -->
+<section id="howItWorksSection" class="bg-white border-b teal-divider py-14 px-6">
+  <div class="max-w-5xl mx-auto">
+    <div class="text-center mb-10">
+      <span class="text-[0.68rem] font-extrabold uppercase tracking-[0.2em]" style="color:var(--t600)">Simple 3-Step Process</span>
+      <h2 class="text-2xl font-black text-teal-900 mt-2">How Aura Works</h2>
+    </div>
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+
+      <div class="flex items-start gap-4 bg-[#F0FDFA] border border-[#CCFBF1] rounded-2xl p-5">
+        <div class="w-12 h-12 g-teal rounded-2xl flex items-center justify-center flex-shrink-0 shadow-sm">
+          <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+          </svg>
+        </div>
+        <div>
+          <p class="font-bold text-teal-900">Describe & Document</p>
+          <p class="text-sm text-teal-700 mt-0.5 leading-relaxed">Tell us what you see. Add a photo and share GPS location for the fastest response.</p>
+        </div>
+      </div>
+
+      <div class="flex items-start gap-4 bg-[#F0FDFA] border border-[#CCFBF1] rounded-2xl p-5">
+        <div class="w-12 h-12 g-purple rounded-2xl flex items-center justify-center flex-shrink-0 shadow-sm">
+          <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/>
+          </svg>
+        </div>
+        <div>
+          <p class="font-bold text-teal-900">AI Triage Analysis</p>
+          <p class="text-sm text-teal-700 mt-0.5 leading-relaxed">Aura classifies the animal, grades severity, and finds the right rescue authority.</p>
+        </div>
+      </div>
+
+      <div class="flex items-start gap-4 bg-[#F0FDFA] border border-[#CCFBF1] rounded-2xl p-5">
+        <div class="w-12 h-12 g-green rounded-2xl flex items-center justify-center flex-shrink-0 shadow-sm">
+          <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+          </svg>
+        </div>
+        <div>
+          <p class="font-bold text-teal-900">Get Safe Guidance</p>
+          <p class="text-sm text-teal-700 mt-0.5 leading-relaxed">Receive 3 immediate, safe action steps while the rescue team is on the way.</p>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+
+<!-- ═══════════════════════════════════════════════════
+     REPORT FORM
+═══════════════════════════════════════════════════ -->
+<section id="reportSection" class="bg-[#F0FDFA] py-10 px-6">
+  <div class="max-w-5xl mx-auto">
+
+    <div class="mb-8">
+      <span class="text-[0.68rem] font-extrabold uppercase tracking-[0.2em]" style="color:var(--t600)">Submit a Report</span>
+      <h2 class="text-2xl font-black text-teal-900 mt-1.5">Report a Distressed Animal</h2>
+      <p class="text-teal-700 text-sm mt-2">The more detail you provide, the more precisely Aura can triage and route help.</p>
+    </div>
+
+    <form id="reportForm" novalidate>
+      <div class="form-grid">
+
+        <!-- LEFT COLUMN: form fields -->
+        <div class="form-col space-y-4">
+
+          <!-- Photo Upload — first -->
+          <div class="card rounded-3xl p-5">
+            <label class="flex items-center gap-2.5 text-sm font-bold text-teal-900 mb-3">
+              <span class="w-7 h-7 bg-purple-50 border border-purple-100 rounded-xl flex items-center justify-center">
+                <svg class="w-3.5 h-3.5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/>
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"/>
+                </svg>
+              </span>
+              Photo <span class="text-teal-400 font-normal text-xs ml-1">(optional)</span>
+            </label>
+            <div id="uploadZone"
+              class="upload-zone border-2 border-dashed border-teal-200 rounded-2xl p-7 text-center cursor-pointer"
+              onclick="document.getElementById('imageInput').click()">
+              <div id="uploadDefault">
+                <div class="w-12 h-12 bg-teal-50 border border-teal-100 rounded-2xl flex items-center justify-center mx-auto mb-3">
+                  <svg class="w-6 h-6 text-teal-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                      d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                  </svg>
+                </div>
+                <p class="text-sm font-semibold text-teal-700">Tap to take a photo or upload</p>
+                <p class="text-xs text-teal-400 mt-1">Camera · Gallery · Any image format</p>
+              </div>
+              <div id="uploadPreview" class="hidden">
+                <img id="previewImg" class="max-h-44 mx-auto rounded-xl object-cover mb-2.5" alt="Preview"/>
+                <p id="previewName" class="text-xs text-teal-600 font-medium truncate max-w-[200px] mx-auto"></p>
+                <button type="button" onclick="clearImage(event)" class="mt-2 text-xs text-red-500 font-semibold hover:text-red-600">Remove photo</button>
+              </div>
+            </div>
+            <input type="file" id="imageInput" accept="image/*" capture="environment" class="hidden"/>
+          </div>
+
+          <!-- Description — below photo -->
+          <div class="card rounded-3xl p-5">
+            <label class="flex items-center gap-2.5 text-sm font-bold text-teal-900 mb-3">
+              <span class="w-7 h-7 bg-teal-50 border border-teal-100 rounded-xl flex items-center justify-center">
+                <svg class="w-3.5 h-3.5" style="color:var(--t600)" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                </svg>
+              </span>
+              Describe what you see <span class="text-red-500 ml-0.5">*</span>
+            </label>
+            <textarea id="descriptionInput" rows="5" required
+              class="w-full bg-teal-50/40 border border-teal-100 rounded-2xl p-4 text-sm text-teal-900 placeholder-teal-400 resize-none transition-all leading-relaxed"
+              placeholder="e.g. Found an injured stray dog near the park entrance — seems to have a broken front leg, whimpering and unable to move…"></textarea>
+            <p class="text-[0.72rem] text-teal-500 mt-2">Species, injuries, behaviour, surroundings — every detail helps.</p>
+          </div>
+
+        </div>
+
+        <!-- RIGHT COLUMN: location + submit + info -->
+        <div class="side-col space-y-4">
+
+          <!-- Location -->
+          <div class="card rounded-3xl p-5">
+            <label class="flex items-center gap-2.5 text-sm font-bold text-teal-900 mb-3">
+              <span class="w-7 h-7 bg-green-50 border border-green-100 rounded-xl flex items-center justify-center">
+                <svg class="w-3.5 h-3.5 text-green-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
+                </svg>
+              </span>
+              Location <span class="text-red-500 ml-0.5">*</span>
+            </label>
+            <button type="button" id="getLocationBtn"
+              class="w-full g-green text-white py-3.5 px-4 rounded-2xl font-semibold text-sm flex items-center justify-center gap-2.5 shadow-sm active:scale-[.97] transition-transform">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
+              </svg>
+              <span id="locationBtnText">Share My Location</span>
+            </button>
+            <div id="locationSuccess" class="hidden mt-3 flex items-center gap-2 bg-emerald-50 border border-emerald-200 rounded-xl px-3.5 py-2.5">
+              <svg class="w-4 h-4 text-emerald-600 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+              </svg>
+              <span id="locationText" class="text-xs text-emerald-800 font-medium"></span>
+            </div>
+            <div id="locationError" class="hidden mt-3 flex items-center gap-2 bg-red-50 border border-red-200 rounded-xl px-3.5 py-2.5">
+              <svg class="w-4 h-4 text-red-500 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
+              </svg>
+              <span id="locationErrorText" class="text-xs text-red-700 font-medium"></span>
+            </div>
+            <input type="hidden" id="latInput"/>
+            <input type="hidden" id="lngInput"/>
+          </div>
+
+          <!-- Submit -->
+          <button type="submit" id="submitBtn"
+            class="w-full g-teal text-white py-4 px-6 rounded-2xl font-extrabold text-[0.95rem] shadow-lg flex items-center justify-center gap-2.5 active:scale-[.97] transition-all"
+            style="box-shadow:0 4px 20px rgba(13,148,136,.35)">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
+                d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.34 16.5c-.77.833.192 2.5 1.732 2.5z"/>
+            </svg>
+            Alert Rescue Agent
+          </button>
+
+          <!-- Info card -->
+          <div class="card rounded-3xl p-5">
+            <p class="text-[0.68rem] font-bold text-teal-500 uppercase tracking-widest mb-3">What happens next</p>
+            <div class="space-y-3">
+              <div class="flex items-start gap-2.5">
+                <div class="w-6 h-6 g-teal rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5">
+                  <svg class="w-3.5 h-3.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 12l2 2 4-4"/>
+                  </svg>
+                </div>
+                <p class="text-xs text-teal-700 leading-relaxed">Aura AI classifies the animal and grades the severity of the situation.</p>
+              </div>
+              <div class="flex items-start gap-2.5">
+                <div class="w-6 h-6 g-teal rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5">
+                  <svg class="w-3.5 h-3.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 12l2 2 4-4"/>
+                  </svg>
+                </div>
+                <p class="text-xs text-teal-700 leading-relaxed">The right authority (NGO or Animal Control) is identified and alerted.</p>
+              </div>
+              <div class="flex items-start gap-2.5">
+                <div class="w-6 h-6 g-teal rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5">
+                  <svg class="w-3.5 h-3.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 12l2 2 4-4"/>
+                  </svg>
+                </div>
+                <p class="text-xs text-teal-700 leading-relaxed">You receive 3 safe, immediate action steps to follow right now.</p>
+              </div>
+            </div>
+          </div>
+
+          <p class="text-[0.72rem] text-center text-teal-500 px-2">
+            ⚠️ For life-threatening emergencies involving humans, call emergency services (911) first.
+          </p>
+
+        </div>
+      </div><!-- /form-grid -->
+    </form>
+  </div>
+</section>
+
+
+<!-- ═══════════════════════════════════════════════════
+     LOADING
+═══════════════════════════════════════════════════ -->
+<div id="loadingSection" class="hidden bg-white border-t teal-divider py-16 px-6">
+  <div class="max-w-5xl mx-auto text-center">
+
+    <div class="relative w-20 h-20 mx-auto mb-8">
+      <div class="absolute inset-0 g-teal rounded-full opacity-20 animate-ping"></div>
+      <div class="absolute inset-2 g-teal rounded-full opacity-30 animate-ping" style="animation-delay:.3s"></div>
+      <div class="relative w-20 h-20 g-teal rounded-full flex items-center justify-center shadow-xl" style="box-shadow:0 8px 32px rgba(13,148,136,.35)">
+        <svg class="w-9 h-9 text-white animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/>
+        </svg>
+      </div>
+    </div>
+
+    <h3 class="text-xl font-black text-teal-900 mb-1.5">Aura is analyzing…</h3>
+    <p class="text-sm text-teal-600 mb-10">Our AI agent is reviewing your report</p>
+
+    <div class="space-y-3 max-w-xs mx-auto text-left">
+      <div id="step1" class="flex items-center gap-3.5">
+        <div id="step1Icon" class="w-7 h-7 rounded-full border-2 border-teal-200 flex items-center justify-center flex-shrink-0 transition-all">
+          <div class="w-2 h-2 bg-teal-200 rounded-full"></div>
+        </div>
+        <span id="step1Text" class="text-sm text-teal-500 transition-colors">Analyzing report…</span>
+      </div>
+      <div id="step2" class="flex items-center gap-3.5">
+        <div id="step2Icon" class="w-7 h-7 rounded-full border-2 border-teal-200 flex items-center justify-center flex-shrink-0 transition-all">
+          <div class="w-2 h-2 bg-teal-200 rounded-full"></div>
+        </div>
+        <span id="step2Text" class="text-sm text-teal-500 transition-colors">Checking rescue priority…</span>
+      </div>
+      <div id="step3" class="flex items-center gap-3.5">
+        <div id="step3Icon" class="w-7 h-7 rounded-full border-2 border-teal-200 flex items-center justify-center flex-shrink-0 transition-all">
+          <div class="w-2 h-2 bg-teal-200 rounded-full"></div>
+        </div>
+        <span id="step3Text" class="text-sm text-teal-500 transition-colors">Preparing safe next steps…</span>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════
+     RESULTS
+═══════════════════════════════════════════════════ -->
+<div id="resultsSection" class="hidden bg-[#F0FDFA] border-t teal-divider py-10 px-6">
+  <div class="max-w-5xl mx-auto">
+
+    <!-- Header -->
+    <div class="flex items-center gap-3 mb-6 animate-fade-in">
+      <div class="w-10 h-10 bg-emerald-100 border border-emerald-200 rounded-2xl flex items-center justify-center">
+        <svg class="w-5 h-5 text-emerald-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/>
+        </svg>
+      </div>
+      <div>
+        <p class="font-black text-teal-900">Report Submitted</p>
+        <p class="text-xs text-teal-500">AI triage complete · <span id="resultTimestamp"></span></p>
+      </div>
+    </div>
+
+    <!-- 2-col results grid on desktop -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+
+      <!-- Classification -->
+      <div class="card rounded-3xl p-5 animate-slide-up">
+        <p class="text-[0.65rem] font-extrabold text-teal-400 uppercase tracking-widest mb-4">AI Classification</p>
+        <div class="flex items-center justify-between gap-3">
+          <div class="flex items-center gap-3">
+            <div class="w-12 h-12 bg-teal-50 border border-teal-100 rounded-2xl flex items-center justify-center text-2xl flex-shrink-0" id="animalEmoji">🐾</div>
+            <div>
+              <p id="classificationText" class="text-lg font-black text-teal-900"></p>
+              <p class="text-xs text-teal-400 mt-0.5">Identified by Aura AI</p>
+            </div>
+          </div>
+          <div id="severityBadge" class="flex-shrink-0"></div>
+        </div>
+      </div>
+
+      <!-- Routing -->
+      <div id="routingCard" class="rounded-3xl p-5 border animate-slide-up" style="animation-delay:.08s">
+        <div class="flex items-start gap-4">
+          <div id="routingIcon" class="w-12 h-12 rounded-2xl flex items-center justify-center flex-shrink-0">
+            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
+            </svg>
+          </div>
+          <div>
+            <p id="routingLabel" class="text-[0.65rem] font-extrabold uppercase tracking-widest mb-1"></p>
+            <p id="routingText" class="font-bold text-base leading-snug"></p>
+            <p id="routingLocation" class="text-xs mt-1"></p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tips — full width -->
+      <div class="card rounded-3xl p-5 lg:col-span-2 animate-slide-up" style="animation-delay:.16s">
+        <div class="flex items-center gap-2.5 mb-4">
+          <div class="w-7 h-7 bg-teal-50 border border-teal-100 rounded-xl flex items-center justify-center">
+            <svg class="w-4 h-4" style="color:var(--t600)" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+            </svg>
+          </div>
+          <p class="font-bold text-teal-900 text-sm">What to do right now</p>
+        </div>
+        <div id="tipsContainer" class="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-4"></div>
+        <div class="flex items-start gap-2.5 bg-amber-50 border border-amber-200 rounded-2xl p-3.5">
+          <svg class="w-4 h-4 text-amber-600 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd"
+              d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
+          </svg>
+          <p class="text-xs text-amber-800 leading-relaxed">AI-generated guidance only. Always prioritise your personal safety. Never handle injured wild animals without professional support.</p>
+        </div>
+      </div>
+
+    </div><!-- /results grid -->
+
+    <button onclick="resetForm()"
+      class="mt-4 w-full bg-white border-2 border-teal-200 text-teal-700 py-4 px-6 rounded-2xl font-bold text-sm flex items-center justify-center gap-2 hover:border-teal-400 hover:text-teal-800 active:scale-[.97] transition-all animate-slide-up"
+      style="animation-delay:.24s">
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+      </svg>
+      Submit Another Report
+    </button>
+
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════
+     FOOTER
+═══════════════════════════════════════════════════ -->
+<footer class="bg-white border-t teal-divider py-8 px-6 text-center">
+  <div class="max-w-5xl mx-auto">
+    <div class="flex items-center justify-center gap-2 mb-2">
+      <div class="w-7 h-7 g-teal rounded-xl flex items-center justify-center">
+        <svg class="w-3.5 h-3.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
+            d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
+        </svg>
+      </div>
+      <span class="font-extrabold text-teal-800">Aura AI</span>
+    </div>
+    <p class="text-xs text-teal-400">Powered by NVIDIA NIM · Built for Animal Rescue</p>
+  </div>
+</footer>
+
+<script src="app.js"></script>
 </body>
 </html>

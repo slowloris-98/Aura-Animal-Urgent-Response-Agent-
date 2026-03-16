@@ -1,130 +1,371 @@
 document.addEventListener('DOMContentLoaded', () => {
-    const form = document.getElementById('reportForm');
-    const getLocationBtn = document.getElementById('getLocationBtn');
-    const locationStatus = document.getElementById('locationStatus');
-    const latInput = document.getElementById('latInput');
-    const lngInput = document.getElementById('lngInput');
-    const resultsArea = document.getElementById('resultsArea');
-    const responseText = document.getElementById('responseText');
-    const submitBtn = document.getElementById('submitBtn');
 
-    // Geolocation handler
-    getLocationBtn.addEventListener('click', () => {
-        if (!navigator.geolocation) {
-            locationStatus.textContent = 'Geolocation is not supported by your browser.';
-            locationStatus.className = 'text-xs text-red-500 text-center mt-1';
-            return;
-        }
+  // ── DOM refs ──────────────────────────────────────────────
+  const form            = document.getElementById('reportForm');
+  const submitBtn       = document.getElementById('submitBtn');
+  const imageInput      = document.getElementById('imageInput');
+  const uploadZone      = document.getElementById('uploadZone');
+  const uploadDefault   = document.getElementById('uploadDefault');
+  const uploadPreview   = document.getElementById('uploadPreview');
+  const previewImg      = document.getElementById('previewImg');
+  const previewName     = document.getElementById('previewName');
+  const getLocationBtn  = document.getElementById('getLocationBtn');
+  const locationBtnText = document.getElementById('locationBtnText');
+  const locationSuccess = document.getElementById('locationSuccess');
+  const locationText    = document.getElementById('locationText');
+  const locationError   = document.getElementById('locationError');
+  const locationErrorText = document.getElementById('locationErrorText');
+  const latInput        = document.getElementById('latInput');
+  const lngInput        = document.getElementById('lngInput');
+  const reportSection   = document.getElementById('reportSection');
+  const loadingSection  = document.getElementById('loadingSection');
+  const resultsSection  = document.getElementById('resultsSection');
 
-        locationStatus.textContent = 'Locating...';
-        locationStatus.className = 'text-xs text-gray-500 text-center mt-1';
+  // ── Scroll helpers (called from HTML onclick) ─────────────
+  window.scrollToReport = () =>
+    document.getElementById('reportSection').scrollIntoView({ behavior: 'smooth' });
 
-        navigator.geolocation.getCurrentPosition(
-            (position) => {
-                latInput.value = position.coords.latitude;
-                lngInput.value = position.coords.longitude;
-                locationStatus.textContent = `Location captured: ${position.coords.latitude.toFixed(4)}, ${position.coords.longitude.toFixed(4)}`;
-                locationStatus.className = 'text-xs text-green-600 text-center mt-1 font-medium';
-            },
-            (error) => {
-                console.error('Error getting location:', error);
-                locationStatus.textContent = 'Unable to retrieve location. Please check permissions.';
-                locationStatus.className = 'text-xs text-red-500 text-center mt-1';
-            }
-        );
+  window.scrollToHowItWorks = () =>
+    document.getElementById('howItWorksSection').scrollIntoView({ behavior: 'smooth' });
+
+  // ── Image upload ──────────────────────────────────────────
+  imageInput.addEventListener('change', (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (evt) => {
+      previewImg.src = evt.target.result;
+      previewName.textContent = file.name;
+      uploadDefault.classList.add('hidden');
+      uploadPreview.classList.remove('hidden');
+    };
+    reader.readAsDataURL(file);
+  });
+
+  window.clearImage = (e) => {
+    e.stopPropagation();
+    imageInput.value = '';
+    uploadDefault.classList.remove('hidden');
+    uploadPreview.classList.add('hidden');
+  };
+
+  // Drag-and-drop
+  uploadZone.addEventListener('dragover',  (e) => { e.preventDefault(); uploadZone.classList.add('dragover'); });
+  uploadZone.addEventListener('dragleave', ()  => uploadZone.classList.remove('dragover'));
+  uploadZone.addEventListener('drop', (e) => {
+    e.preventDefault();
+    uploadZone.classList.remove('dragover');
+    const file = e.dataTransfer.files[0];
+    if (file && file.type.startsWith('image/')) {
+      const dt = new DataTransfer();
+      dt.items.add(file);
+      imageInput.files = dt.files;
+      imageInput.dispatchEvent(new Event('change'));
+    }
+  });
+
+  // ── Geolocation ───────────────────────────────────────────
+  getLocationBtn.addEventListener('click', () => {
+    if (!navigator.geolocation) {
+      showLocError('Geolocation is not supported by your browser.');
+      return;
+    }
+    locationBtnText.textContent = 'Locating…';
+    getLocationBtn.disabled = true;
+
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        latInput.value = pos.coords.latitude;
+        lngInput.value = pos.coords.longitude;
+        locationBtnText.textContent = 'Location Captured ✓';
+        getLocationBtn.style.background = 'linear-gradient(135deg, #276749, #166534)';
+        getLocationBtn.disabled = false;
+        locationText.textContent =
+          `${pos.coords.latitude.toFixed(5)}, ${pos.coords.longitude.toFixed(5)}`;
+        locationSuccess.classList.remove('hidden');
+        locationSuccess.classList.add('flex');
+        locationError.classList.add('hidden');
+      },
+      () => {
+        locationBtnText.textContent = 'Share My Location';
+        getLocationBtn.disabled = false;
+        getLocationBtn.style.background = '';
+        showLocError('Unable to retrieve location. Check browser permissions.');
+      }
+    );
+  });
+
+  function showLocError(msg) {
+    locationErrorText.textContent = msg;
+    locationError.classList.remove('hidden');
+    locationError.classList.add('flex');
+    locationSuccess.classList.add('hidden');
+  }
+
+  // ── Section visibility ────────────────────────────────────
+  function showSection(section) {
+    [reportSection, loadingSection, resultsSection].forEach(s => s.classList.add('hidden'));
+    section.classList.remove('hidden');
+    section.scrollIntoView({ behavior: 'smooth' });
+  }
+
+  // ── Loading step animation ────────────────────────────────
+  const CHECK_SVG = `<svg class="w-3.5 h-3.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/>
+  </svg>`;
+
+  const SPIN_SVG = `<svg class="w-3.5 h-3.5 spin" style="color:#14B8A6" fill="none" viewBox="0 0 24 24">
+    <circle class="opacity-20" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+    <path class="opacity-80" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
+  </svg>`;
+
+  function animateSteps() {
+    const steps = [
+      { icon: document.getElementById('step1Icon'), text: document.getElementById('step1Text') },
+      { icon: document.getElementById('step2Icon'), text: document.getElementById('step2Text') },
+      { icon: document.getElementById('step3Icon'), text: document.getElementById('step3Text') },
+    ];
+
+    // Reset all
+    steps.forEach(({ icon, text }) => {
+      icon.className = 'w-7 h-7 rounded-full border-2 border-slate-200 flex items-center justify-center flex-shrink-0 transition-all';
+      icon.innerHTML = '<div class="w-2 h-2 bg-slate-300 rounded-full"></div>';
+      text.className = 'text-sm text-slate-500 transition-colors';
     });
 
-    // Form submission handler
-    form.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        
-        const description = document.getElementById('descriptionInput').value;
-        const imageFile = document.getElementById('imageInput').files[0];
-        const lat = latInput.value;
-        const lng = lngInput.value;
+    steps.forEach(({ icon, text }, i) => {
+      setTimeout(() => {
+        // Activate current
+        icon.className = 'w-7 h-7 rounded-full border-2 border-teal-400 flex items-center justify-center flex-shrink-0 transition-all';
+        icon.innerHTML = SPIN_SVG;
+        text.className = 'text-sm text-teal-600 font-semibold transition-colors';
 
-        if (!lat || !lng) {
-            alert('Please capture your location first to help the response team find the animal.');
-            return;
+        // Mark previous done
+        if (i > 0) {
+          const prev = steps[i - 1];
+          prev.icon.className = 'w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0 transition-all';
+          prev.icon.style.background = 'linear-gradient(135deg,#276749,#166534)';
+          prev.icon.innerHTML = CHECK_SVG;
+          prev.text.className = 'text-sm text-green-800 font-medium transition-colors';
         }
 
-        // Show loading state
-        resultsArea.classList.remove('hidden');
-        responseText.innerHTML = '<span class="animate-pulse text-emerald-600 font-medium">Analyzing with Aura AI...</span>';
-        submitBtn.disabled = true;
-        submitBtn.classList.add('opacity-50', 'cursor-not-allowed');
-
-        const formData = new FormData();
-        formData.append('description', description);
-        formData.append('latitude', lat);
-        formData.append('longitude', lng);
-        if (imageFile) {
-            formData.append('image', imageFile);
+        // Mark last done after delay
+        if (i === steps.length - 1) {
+          setTimeout(() => {
+            icon.className = 'w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0 transition-all';
+            icon.style.background = 'linear-gradient(135deg,#276749,#166534)';
+            icon.innerHTML = CHECK_SVG;
+            text.className = 'text-sm text-green-800 font-medium transition-colors';
+          }, 1100);
         }
-
-        try {
-            // Pointing to our FastAPI backend
-            const response = await fetch('http://localhost:8000/api/report', {
-                method: 'POST',
-                body: formData
-            });
-            const result = await response.json();
-            
-            if (response.ok && result.status === 'success') {
-                const analysis = result.analysis;
-                const severityColors = {
-                    'Low': 'bg-yellow-100 text-yellow-800 border-yellow-200',
-                    'Medium': 'bg-orange-100 text-orange-800 border-orange-200',
-                    'High': 'bg-red-100 text-red-800 border-red-200',
-                    'Critical': 'bg-red-600 text-white border-red-700 font-bold'
-                };
-                
-                const sevColor = severityColors[analysis.severity] || severityColors['Medium'];
-
-                let tipsHtml = analysis.tips.map(tip => `<li class="flex items-start gap-2"><svg class="w-5 h-5 text-emerald-500 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg><span>${tip}</span></li>`).join('');
-
-                responseText.innerHTML = `
-                    <div class="space-y-4">
-                        <!-- Header / Classification -->
-                        <div class="flex items-center justify-between border-b pb-3">
-                            <div>
-                                <h4 class="font-bold text-gray-800 text-lg">${analysis.classification}</h4>
-                                <p class="text-xs text-gray-500">AI Classification</p>
-                            </div>
-                            <span class="px-3 py-1 rounded-full text-xs border uppercase tracking-wider ${sevColor}">${analysis.severity} SEVERITY</span>
-                        </div>
-
-                        <!-- Routing Alert -->
-                        <div class="bg-blue-50 border border-blue-200 rounded-lg p-3 flex items-start gap-3">
-                            <div class="bg-blue-100 p-2 rounded-full mt-1">
-                                <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path></svg>
-                            </div>
-                            <div>
-                                <p class="text-sm font-semibold text-blue-900">Authorities Notified</p>
-                                <p class="text-xs text-blue-700 mt-1">Initiated protocol: <strong>${analysis.routing}</strong> near location (${result.data.location.lat.toFixed(3)}, ${result.data.location.lng.toFixed(3)}).</p>
-                            </div>
-                        </div>
-
-                        <!-- First Aid Tips -->
-                        <div class="pt-2">
-                            <p class="text-sm font-bold text-gray-700 mb-2">Immediate Safety Steps:</p>
-                            <ul class="text-sm text-gray-600 space-y-2">
-                                ${tipsHtml}
-                            </ul>
-                            <p class="text-xs text-gray-400 italic mt-3">⚠️ AI generated tips. Prioritize your personal safety at all times.</p>
-                        </div>
-                    </div>
-                `;
-            } else {
-                 responseText.innerHTML = '<span class="text-red-500 font-medium">Server processed the request but returned an error. Check logs.</span>';
-            }
-            
-        } catch (error) {
-            console.error('Submission error:', error);
-            responseText.innerHTML = '<span class="text-red-500 font-medium">Error connecting to the server. Please ensure the backend is running.</span>';
-        } finally {
-            submitBtn.disabled = false;
-            submitBtn.classList.remove('opacity-50', 'cursor-not-allowed');
-        }
+      }, i * 1200);
     });
+  }
+
+  // ── Severity config ───────────────────────────────────────
+  const SEV = {
+    Low: {
+      badgeClass:   'sev-low',
+      routingBg:    '#F0FDF4',
+      routingBorder:'#BBF7D0',
+      iconGradient: 'linear-gradient(135deg,#276749,#166534)',
+      labelColor:   '#166534',
+      textColor:    '#14532D',
+      locColor:     '#166534',
+      pulse: false,
+    },
+    Medium: {
+      badgeClass:   'sev-medium',
+      routingBg:    '#FFFBEB',
+      routingBorder:'#FDE68A',
+      iconGradient: 'linear-gradient(135deg,#B45309,#92400E)',
+      labelColor:   '#92400E',
+      textColor:    '#78350F',
+      locColor:     '#B45309',
+      pulse: false,
+    },
+    High: {
+      badgeClass:   'sev-high',
+      routingBg:    '#FFF7ED',
+      routingBorder:'#FDBA74',
+      iconGradient: 'linear-gradient(135deg,#C05621,#9A3412)',
+      labelColor:   '#9A3412',
+      textColor:    '#7C2D12',
+      locColor:     '#C05621',
+      pulse: false,
+    },
+    Critical: {
+      badgeClass:   'sev-critical pulse-ring',
+      routingBg:    '#FEF2F2',
+      routingBorder:'#FECACA',
+      iconGradient: 'linear-gradient(135deg,#B91C1C,#7F1D1D)',
+      labelColor:   '#991B1B',
+      textColor:    '#7F1D1D',
+      locColor:     '#B91C1C',
+      pulse: true,
+    },
+  };
+
+
+  // ── Animal emoji map ──────────────────────────────────────
+  function animalEmoji(classification) {
+    const c = classification.toLowerCase();
+    if (c.includes('dog'))    return '🐕';
+    if (c.includes('cat'))    return '🐈';
+    if (c.includes('bird'))   return '🐦';
+    if (c.includes('rabbit')) return '🐇';
+    if (c.includes('snake'))  return '🐍';
+    if (c.includes('deer'))   return '🦌';
+    if (c.includes('fox'))    return '🦊';
+    if (c.includes('bear'))   return '🐻';
+    if (c.includes('horse'))  return '🐴';
+    if (c.includes('turtle')) return '🐢';
+    if (c.includes('fish'))   return '🐟';
+    if (c.includes('cow'))    return '🐄';
+    if (c.includes('pig'))    return '🐷';
+    if (c.includes('monkey')) return '🐒';
+    return '🐾';
+  }
+
+  // ── Render results ────────────────────────────────────────
+  function renderResults(analysis, resultData) {
+    const sev    = analysis.severity || 'Medium';
+    const config = SEV[sev] || SEV.Medium;
+
+    // Timestamp
+    document.getElementById('resultTimestamp').textContent =
+      new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+    // Classification
+    document.getElementById('classificationText').textContent = analysis.classification;
+    document.getElementById('animalEmoji').textContent = animalEmoji(analysis.classification);
+
+    // Severity badge
+    document.getElementById('severityBadge').innerHTML = `
+      <span class="relative inline-flex items-center gap-1.5 ${config.badgeClass} text-white text-[0.7rem] font-black px-3 py-1.5 rounded-full uppercase tracking-wider">
+        <span class="w-1.5 h-1.5 bg-white rounded-full ${config.pulse ? 'animate-pulse' : ''}"></span>
+        ${sev}
+      </span>`;
+
+    // Routing card
+    const rc = document.getElementById('routingCard');
+    rc.style.background    = config.routingBg;
+    rc.style.borderColor   = config.routingBorder;
+
+    const ri = document.getElementById('routingIcon');
+    ri.style.background = config.iconGradient;
+
+    document.getElementById('routingLabel').style.color = config.labelColor;
+    document.getElementById('routingLabel').textContent = 'Rescue Protocol Initiated';
+
+    document.getElementById('routingText').style.color = config.textColor;
+    document.getElementById('routingText').textContent = analysis.routing;
+
+    document.getElementById('routingLocation').style.color = config.locColor;
+    document.getElementById('routingLocation').textContent =
+      resultData.location.lat && resultData.location.lng
+        ? `Near coordinates: ${resultData.location.lat.toFixed(4)}, ${resultData.location.lng.toFixed(4)}`
+        : 'Location not provided';
+
+    // Tips
+    document.getElementById('tipsContainer').innerHTML = analysis.tips.map((tip, i) => `
+      <div class="tip-item flex items-start gap-3 bg-teal-50 border border-teal-100 rounded-2xl p-3.5">
+        <span class="w-7 h-7 flex-shrink-0 rounded-xl flex items-center justify-center text-white text-xs font-black shadow-sm" style="background:linear-gradient(135deg,#14B8A6,#0D9488)">${i + 1}</span>
+        <p class="text-sm text-teal-800 leading-relaxed pt-0.5">${tip}</p>
+      </div>`).join('');
+
+    showSection(resultsSection);
+  }
+
+  // ── Toast helper ──────────────────────────────────────────
+  function showToast(message, isError = true) {
+    const toast = document.createElement('div');
+    toast.className =
+      `toast fixed bottom-6 left-1/2 -translate-x-1/2 z-50 flex items-center gap-2.5 px-5 py-3 rounded-2xl shadow-xl text-sm font-semibold text-white max-w-[90vw] text-center ${isError ? 'bg-red-600' : 'bg-emerald-600'}`;
+    toast.innerHTML = isError
+      ? `<svg class="w-4 h-4 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+           <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
+         </svg>${message}`
+      : `<svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/>
+         </svg>${message}`;
+    document.body.appendChild(toast);
+    setTimeout(() => {
+      toast.style.transition = 'opacity .3s';
+      toast.style.opacity = '0';
+      setTimeout(() => toast.remove(), 300);
+    }, 4500);
+  }
+
+  // ── Reset form ────────────────────────────────────────────
+  window.resetForm = () => {
+    form.reset();
+    latInput.value = '';
+    lngInput.value = '';
+    locationBtnText.textContent = 'Share My Location';
+    getLocationBtn.style.background = '';
+    getLocationBtn.disabled = false;
+    locationSuccess.classList.add('hidden');
+    locationError.classList.add('hidden');
+    uploadDefault.classList.remove('hidden');
+    uploadPreview.classList.add('hidden');
+    showSection(reportSection);
+  };
+
+  // ── Form submit ───────────────────────────────────────────
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    const description = document.getElementById('descriptionInput').value.trim();
+    const imageFile   = imageInput.files[0];
+    const lat         = latInput.value;
+    const lng         = lngInput.value;
+
+    if (!description) {
+      document.getElementById('descriptionInput').focus();
+      showToast('Please describe what you see before submitting.');
+      return;
+    }
+
+    if (!lat || !lng) {
+      showLocError('Please share your location before submitting.');
+      getLocationBtn.classList.add('animate-pulse');
+      setTimeout(() => getLocationBtn.classList.remove('animate-pulse'), 1500);
+      return;
+    }
+
+    // Show loading
+    showSection(loadingSection);
+    animateSteps();
+
+    const formData = new FormData();
+    formData.append('description', description);
+    formData.append('latitude',    lat);
+    formData.append('longitude',   lng);
+    if (imageFile) formData.append('image', imageFile);
+
+    // Minimum display time for the loading animation to feel intentional
+    const minWait = new Promise(res => setTimeout(res, 3800));
+
+    try {
+      const [response] = await Promise.all([
+        fetch('http://127.0.0.1:8000/api/report', { method: 'POST', body: formData }),
+        minWait,
+      ]);
+      const result = await response.json();
+
+      if (response.ok && result.status === 'success') {
+        renderResults(result.analysis, result.data);
+      } else {
+        showSection(reportSection);
+        showToast(result.detail || 'The server returned an error. Please try again.');
+      }
+    } catch (err) {
+      console.error('Submission error:', err);
+      await minWait;
+      showSection(reportSection);
+      showToast('Could not connect to the backend. Make sure the server is running on port 8000.');
+    }
+  });
+
 });
