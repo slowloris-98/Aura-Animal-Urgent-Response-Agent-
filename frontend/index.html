@@ -8,6 +8,12 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet"/>
   <script src="https://cdn.tailwindcss.com?plugins=typography"></script>
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <!-- Leaflet maps -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
   <script>
     tailwind.config = {
       theme: {
@@ -126,9 +132,24 @@
         gap: 1.5rem;
         align-items: start;
       }
-      .form-grid .form-col { /* left column */ }
-      .form-grid .side-col { /* right column */ }
     }
+
+    /* ── Leaflet map ──────────────────────────────── */
+    .leaflet-container { border-radius: 1rem; z-index: 0; }
+
+    /* ── Geo-risk pill ────────────────────────────── */
+    .geo-pill {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 4px 10px; border-radius: 999px;
+      font-size: 0.7rem; font-weight: 700;
+    }
+
+    /* ── Safety "don't" items ─────────────────────── */
+    .dont-item { animation: slideUp .35s ease-out both; }
+    .dont-item:nth-child(1) { animation-delay: .05s; }
+    .dont-item:nth-child(2) { animation-delay: .12s; }
+    .dont-item:nth-child(3) { animation-delay: .19s; }
+    .dont-item:nth-child(4) { animation-delay: .26s; }
   </style>
 </head>
 
@@ -563,6 +584,36 @@
         </div>
       </div>
 
+      <!-- Urgency reason — full width -->
+      <div id="urgencyCard" class="hidden card rounded-3xl p-5 lg:col-span-2 animate-slide-up border-l-4 border-l-orange-400" style="animation-delay:.12s">
+        <div class="flex items-start gap-3">
+          <div class="w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0" style="background:linear-gradient(135deg,#C05621,#9A3412)">
+            <svg class="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
+            </svg>
+          </div>
+          <div>
+            <p class="text-[0.65rem] font-extrabold text-orange-600 uppercase tracking-widest mb-1">Why This Severity</p>
+            <p id="urgencyReasonText" class="text-sm font-semibold text-teal-900 leading-relaxed"></p>
+            <div id="geoRiskPills" class="flex flex-wrap gap-2 mt-2"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Location map — full width -->
+      <div id="mapCard" class="hidden card rounded-3xl p-5 lg:col-span-2 animate-slide-up" style="animation-delay:.14s">
+        <div class="flex items-center gap-2.5 mb-3">
+          <div class="w-7 h-7 bg-teal-50 border border-teal-100 rounded-xl flex items-center justify-center">
+            <svg class="w-4 h-4" style="color:var(--t600)" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"/>
+            </svg>
+          </div>
+          <p class="font-bold text-teal-900 text-sm">Incident Location</p>
+          <span id="mapAddressChip" class="ml-auto text-[0.68rem] text-teal-600 bg-teal-50 border border-teal-100 px-2.5 py-1 rounded-full font-medium truncate max-w-[280px]"></span>
+        </div>
+        <div id="resultMap" style="height:220px"></div>
+      </div>
+
       <!-- Tips — full width -->
       <div class="card rounded-3xl p-5 lg:col-span-2 animate-slide-up" style="animation-delay:.16s">
         <div class="flex items-center gap-2.5 mb-4">
@@ -576,11 +627,24 @@
         <div id="tipsContainer" class="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-4"></div>
         <div class="flex items-start gap-2.5 bg-amber-50 border border-amber-200 rounded-2xl p-3.5">
           <svg class="w-4 h-4 text-amber-600 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-            <path fill-rule="evenodd"
-              d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
+            <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
           </svg>
           <p class="text-xs text-amber-800 leading-relaxed">AI-generated guidance only. Always prioritise your personal safety. Never handle injured wild animals without professional support.</p>
         </div>
+      </div>
+
+      <!-- Safety "Do NOT" layer — full width -->
+      <div id="safetyCard" class="card rounded-3xl p-5 lg:col-span-2 animate-slide-up" style="animation-delay:.2s">
+        <div class="flex items-center gap-2.5 mb-4">
+          <div class="w-7 h-7 bg-red-50 border border-red-100 rounded-xl flex items-center justify-center">
+            <svg class="w-4 h-4 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"/>
+            </svg>
+          </div>
+          <p class="font-bold text-teal-900 text-sm">Critical Safety Rules</p>
+          <span class="ml-auto text-[0.65rem] font-bold text-red-600 bg-red-50 border border-red-200 px-2 py-0.5 rounded-full uppercase tracking-wider">Do NOT</span>
+        </div>
+        <div id="dontsContainer" class="grid grid-cols-1 sm:grid-cols-2 gap-2.5"></div>
       </div>
 
     </div><!-- /results grid -->
@@ -620,6 +684,91 @@
 
   </div>
 </div>
+
+
+<!-- ═══════════════════════════════════════════════════
+     ANALYTICS DASHBOARD
+═══════════════════════════════════════════════════ -->
+<section id="analyticsSection" class="bg-white border-t teal-divider py-14 px-6">
+  <div class="max-w-5xl mx-auto">
+
+    <div class="flex items-start justify-between gap-4 mb-8 flex-wrap">
+      <div>
+        <span class="text-[0.68rem] font-extrabold uppercase tracking-[0.2em]" style="color:var(--t600)">City Intelligence</span>
+        <h2 class="text-2xl font-black text-teal-900 mt-1.5">Rescue Hotspot Dashboard</h2>
+        <p class="text-teal-600 text-sm mt-1.5 max-w-lg">Aura doesn't just help one animal at a time — it helps cities identify recurring danger zones, common injury areas, and times of peak distress.</p>
+      </div>
+      <button onclick="loadAnalytics()" id="refreshAnalyticsBtn"
+        class="g-teal text-white px-5 py-2.5 rounded-xl font-semibold text-sm flex items-center gap-2 flex-shrink-0 active:scale-[.97] transition-transform self-start mt-1">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+        </svg>
+        Refresh
+      </button>
+    </div>
+
+    <!-- Stat cards -->
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6" id="statsCards">
+      <div class="card rounded-2xl p-4 text-center">
+        <p id="statTotal" class="text-3xl font-black text-teal-700">—</p>
+        <p class="text-xs text-teal-500 font-semibold mt-1">Total Reports</p>
+      </div>
+      <div class="card rounded-2xl p-4 text-center">
+        <p id="statCritical" class="text-3xl font-black text-red-600">—</p>
+        <p class="text-xs text-teal-500 font-semibold mt-1">Critical Cases</p>
+      </div>
+      <div class="card rounded-2xl p-4 text-center">
+        <p id="statTopAnimal" class="text-3xl font-black text-teal-700">—</p>
+        <p class="text-xs text-teal-500 font-semibold mt-1">Most Reported</p>
+      </div>
+      <div class="card rounded-2xl p-4 text-center">
+        <p id="statPeakHour" class="text-3xl font-black text-teal-700">—</p>
+        <p class="text-xs text-teal-500 font-semibold mt-1">Peak Hour</p>
+      </div>
+    </div>
+
+    <!-- Map + Charts row -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-5 mb-5">
+
+      <!-- Hotspot map -->
+      <div class="card rounded-3xl p-5">
+        <p class="text-[0.65rem] font-extrabold text-teal-400 uppercase tracking-widest mb-3">Incident Hotspot Map</p>
+        <div id="analyticsMap" style="height:280px; border-radius:0.875rem;"></div>
+        <div class="flex flex-wrap gap-2 mt-3">
+          <span class="geo-pill bg-red-100 text-red-700"><span class="w-2.5 h-2.5 rounded-full bg-red-500 inline-block"></span>Critical</span>
+          <span class="geo-pill bg-orange-100 text-orange-700"><span class="w-2.5 h-2.5 rounded-full bg-orange-500 inline-block"></span>High</span>
+          <span class="geo-pill bg-amber-100 text-amber-700"><span class="w-2.5 h-2.5 rounded-full bg-amber-500 inline-block"></span>Medium</span>
+          <span class="geo-pill bg-teal-100 text-teal-700"><span class="w-2.5 h-2.5 rounded-full bg-teal-500 inline-block"></span>Low</span>
+        </div>
+      </div>
+
+      <!-- Charts column -->
+      <div class="space-y-5">
+        <div class="card rounded-3xl p-5">
+          <p class="text-[0.65rem] font-extrabold text-teal-400 uppercase tracking-widest mb-3">Reports by Hour of Day</p>
+          <canvas id="hourChart" height="120"></canvas>
+        </div>
+        <div class="card rounded-3xl p-5">
+          <p class="text-[0.65rem] font-extrabold text-teal-400 uppercase tracking-widest mb-3">Animal Types</p>
+          <canvas id="classChart" height="120"></canvas>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Empty state -->
+    <div id="analyticsEmpty" class="hidden card rounded-3xl p-10 text-center">
+      <div class="w-14 h-14 bg-teal-50 rounded-2xl flex items-center justify-center mx-auto mb-4">
+        <svg class="w-7 h-7 text-teal-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+        </svg>
+      </div>
+      <p class="font-bold text-teal-800">No data yet</p>
+      <p class="text-sm text-teal-500 mt-1">Submit your first report to start building the dashboard.</p>
+    </div>
+
+  </div>
+</section>
 
 
 <!-- ═══════════════════════════════════════════════════

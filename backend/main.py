@@ -14,7 +14,6 @@ load_dotenv()
 
 app = FastAPI(title="Aura AI - Animal Urgent Response Agent")
 
-# Allow CORS for local frontend testing
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -23,79 +22,86 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Initialize OpenAI client pointing to NVIDIA's API
-# Get your API key from https://build.nvidia.com/
-NVIDIA_API_KEY = os.getenv("NVIDIA_API_KEY")
+NVIDIA_API_KEY  = os.getenv("NVIDIA_API_KEY")
 NVIDIA_MODEL_NAME = os.getenv("NVIDIA_MODEL_NAME", "meta/llama-3.1-70b-instruct")
 
 if not NVIDIA_API_KEY:
     print("WARNING: NVIDIA_API_KEY not found in environment variables.")
 
 client = OpenAI(
-  base_url="https://integrate.api.nvidia.com/v1",
-  api_key=NVIDIA_API_KEY
+    base_url="https://integrate.api.nvidia.com/v1",
+    api_key=NVIDIA_API_KEY
 )
+
+CSV_FILE = "alerts.csv"
+CSV_HEADERS = ['timestamp', 'latitude', 'longitude', 'description',
+               'classification', 'severity', 'routing', 'tips', 'geo_context']
+
 
 @app.get("/")
 def read_root():
     return {"message": "Aura API is running"}
 
+
 @app.post("/api/report")
 async def submit_report(
-    description: str = Form(...),
-    latitude: float = Form(None),
-    longitude: float = Form(None),
+    description: str  = Form(...),
+    latitude:    float = Form(None),
+    longitude:   float = Form(None),
+    geo_context: str  = Form(None),   # enriched location risk from frontend
     image: UploadFile = File(None)
 ):
-    # MVP constraint: Mocking image analysis, relying primarily on text description.
-    # We construct a prompt for NVIDIA Nemotron-4-340B-Instruct (or similar model)
     system_prompt = """
-    You are Aura, an expert AI animal response agent. 
-    Analyze the provided description of an animal in distress.
-    Determine:
-    1. The classification of the animal (e.g., Dog, Cat, Bird, Wildlife) and the severity of the situation (Low, Medium, High, Critical).
-    2. The appropriate routing: either "Alerting Local Wildlife NGO" (for wild animals or specialized cases) or "Alerting Animal Control / Rescue" (for domestic pets like dogs/cats).
-    3. Exactly 3 brief, actionable bullet points of immediate, safe first-aid or securing tips for the user (ensure user safety first).
+You are Aura, an expert AI animal emergency response agent.
+Analyze the provided animal distress report — including the text description AND any location context (proximity to roads, water, urban/wild area).
 
-    Output strictly in the following JSON format without markdown blocks:
-    {
-      "classification": "string",
-      "severity": "string",
-      "routing": "string",
-      "tips": ["tip 1", "tip 2", "tip 3"]
-    }
-    """
+Determine:
+1. The classification of the animal (e.g., "Injured Dog", "Wild Bird", "Stray Cat", "Deer").
+2. The severity of the emergency: Low, Medium, High, or Critical.
+   - Elevate severity if the location context indicates traffic risk, drowning risk, or remote wildlife area.
+3. The appropriate routing:
+   - "Alerting Animal Control / Rescue" for domestic pets (dogs, cats, etc.)
+   - "Alerting Local Wildlife NGO" for wild animals or specialized cases.
+4. Exactly 3 brief, safe, actionable immediate steps for the bystander (prioritise bystander safety first).
+5. A short urgency_reason (1 sentence) that explains WHY this severity was assigned — referencing location context if relevant.
+   E.g. "High urgency due to road proximity — risk of repeated collision." or "Wildlife in remote area — avoid direct contact."
+
+Output STRICTLY in this JSON format with no markdown blocks:
+{
+  "classification": "string",
+  "severity": "string",
+  "routing": "string",
+  "urgency_reason": "string",
+  "tips": ["tip 1", "tip 2", "tip 3"]
+}
+"""
 
     user_prompt = f"Animal Description: {description}"
+    if geo_context:
+        user_prompt += f"\n\nLocation Context: {geo_context}"
 
     try:
         completion = client.chat.completions.create(
-          model=NVIDIA_MODEL_NAME, 
-          messages=[
-              {"role": "system", "content": system_prompt},
-              {"role": "user", "content": user_prompt}
-          ],
-          temperature=0.2,
-          max_tokens=500
+            model=NVIDIA_MODEL_NAME,
+            messages=[
+                {"role": "system", "content": system_prompt},
+                {"role": "user",   "content": user_prompt}
+            ],
+            temperature=0.2,
+            max_tokens=600
         )
-        
-        # Parse the JSON response from the agent
-        ai_response_text = completion.choices[0].message.content
-        ai_analysis = json.loads(ai_response_text)
 
-        # Save to CSV
-        csv_file = "alerts.csv"
-        file_exists = os.path.isfile(csv_file)
-        
-        with open(csv_file, mode='a', newline='', encoding='utf-8') as f:
+        raw = completion.choices[0].message.content
+        # Strip any accidental markdown fences
+        raw = raw.strip().lstrip("```json").lstrip("```").rstrip("```").strip()
+        ai_analysis = json.loads(raw)
+
+        # Persist to CSV
+        file_exists = os.path.isfile(CSV_FILE)
+        with open(CSV_FILE, mode='a', newline='', encoding='utf-8') as f:
             writer = csv.writer(f)
             if not file_exists:
-                # Write headers if the file is being created for the first time
-                writer.writerow(['timestamp', 'latitude', 'longitude', 'description', 'classification', 'severity', 'routing', 'tips'])
-            
-            # Combine the tips into a single string
-            tips_str = " | ".join(ai_analysis.get('tips', []))
-            
+                writer.writerow(CSV_HEADERS)
             writer.writerow([
                 datetime.utcnow().isoformat(),
                 latitude,
@@ -104,7 +110,8 @@ async def submit_report(
                 ai_analysis.get('classification', ''),
                 ai_analysis.get('severity', ''),
                 ai_analysis.get('routing', ''),
-                tips_str
+                " | ".join(ai_analysis.get('tips', [])),
+                geo_context or ''
             ])
 
         return {
@@ -116,6 +123,7 @@ async def submit_report(
                 "filename": image.filename if image else "No image uploaded"
             }
         }
+
     except json.JSONDecodeError:
         raise HTTPException(status_code=500, detail="Failed to parse AI response.")
     except Exception as e:
@@ -158,6 +166,59 @@ async def chat_with_agent(request: ChatRequest):
         return {"status": "success", "reply": reply}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/api/analytics")
+def get_analytics():
+    if not os.path.isfile(CSV_FILE):
+        return {"alerts": [], "total": 0}
+
+    alerts = []
+    severity_counts = {"Low": 0, "Medium": 0, "High": 0, "Critical": 0}
+    classification_counts = {}
+    hour_counts = {str(h): 0 for h in range(24)}
+
+    with open(CSV_FILE, mode='r', encoding='utf-8') as f:
+        reader = csv.DictReader(f)
+        for row in reader:
+            try:
+                lat = float(row.get('latitude') or 0)
+                lng = float(row.get('longitude') or 0)
+                sev = row.get('severity', 'Medium').strip()
+                cls = row.get('classification', 'Unknown').strip()
+                ts  = row.get('timestamp', '')
+
+                if lat and lng:
+                    alerts.append({
+                        "lat":            lat,
+                        "lng":            lng,
+                        "classification": cls,
+                        "severity":       sev,
+                        "routing":        row.get('routing', ''),
+                        "timestamp":      ts,
+                        "geo_context":    row.get('geo_context', ''),
+                    })
+
+                severity_counts[sev] = severity_counts.get(sev, 0) + 1
+                classification_counts[cls] = classification_counts.get(cls, 0) + 1
+
+                if ts:
+                    try:
+                        hour = str(datetime.fromisoformat(ts).hour)
+                        hour_counts[hour] = hour_counts.get(hour, 0) + 1
+                    except Exception:
+                        pass
+
+            except (ValueError, TypeError):
+                continue
+
+    return {
+        "alerts":               alerts,
+        "total":                len(alerts),
+        "severity_counts":      severity_counts,
+        "classification_counts": classification_counts,
+        "hour_counts":          hour_counts,
+    }
+
 
 if __name__ == "__main__":
     uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)
