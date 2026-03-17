@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Example Cases — Aura AI</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet"/>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: { sans: ['Inter', 'system-ui', 'sans-serif'] },
+        }
+      }
+    }
+  </script>
+  <style>
+    :root {
+      --t50:  #F0FDFA;
+      --t100: #CCFBF1;
+      --t400: #2DD4BF;
+      --t500: #14B8A6;
+      --t600: #0D9488;
+      --t700: #0F766E;
+      --t800: #115E59;
+      --t900: #134E4A;
+    }
+    .hero-bg { background: linear-gradient(150deg, var(--t900) 0%, var(--t800) 40%, var(--t700) 100%); }
+    .g-teal  { background: linear-gradient(135deg, var(--t500), var(--t700)); }
+    .g-teal2 { background: linear-gradient(135deg, var(--t400), var(--t600)); }
+    .card {
+      background: #ffffff;
+      border: 1px solid #CCFBF1;
+      box-shadow: 0 2px 16px rgba(13,148,136,.07), 0 1px 3px rgba(13,148,136,.05);
+    }
+    .sev-low      { background: linear-gradient(135deg,#276749,#166534); }
+    .sev-medium   { background: linear-gradient(135deg,#B45309,#92400E); }
+    .sev-high     { background: linear-gradient(135deg,#C05621,#9A3412); }
+    .sev-critical { background: linear-gradient(135deg,#B91C1C,#7F1D1D); }
+    .teal-divider { border-color: #CCFBF1; }
+    .case-reporter { background: linear-gradient(135deg, #F0FDFA, #E6FFFA); border-left: 3px solid var(--t500); }
+  </style>
+</head>
+<body class="font-sans bg-[#F0FDFA] text-teal-900 antialiased">
+
+<!-- Header -->
+<section class="hero-bg relative overflow-hidden">
+  <div class="relative max-w-5xl mx-auto px-6 pt-8 pb-10">
+    <div class="flex items-center justify-between">
+      <a href="index.html" class="flex items-center gap-3">
+        <div class="w-10 h-10 g-teal2 rounded-[14px] flex items-center justify-center shadow-lg">
+          <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
+              d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
+          </svg>
+        </div>
+        <div>
+          <p class="text-white font-extrabold text-[1.1rem] leading-none tracking-tight">Aura AI</p>
+          <p class="text-teal-300 text-[0.68rem] mt-0.5">Animal Response System</p>
+        </div>
+      </a>
+      <a href="index.html"
+        class="text-teal-100 hover:text-white text-[0.8rem] font-semibold px-3 py-2 rounded-xl hover:bg-white/10 transition flex items-center gap-2">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
+        Back to Report
+      </a>
+    </div>
+    <div class="mt-8">
+      <p class="text-[0.7rem] font-extrabold text-teal-300 uppercase tracking-[0.2em] mb-2">Success Stories</p>
+      <h1 class="text-3xl font-black text-white leading-tight">Example Cases</h1>
+      <p class="text-teal-100 text-sm mt-3 max-w-xl">10 successful reports — domestic and wildlife — with the people who reported them and the rescuers who helped. Every story includes reporter actions and how they helped the rescue.</p>
+    </div>
+  </div>
+</section>
+
+<!-- Case cards -->
+<section class="max-w-5xl mx-auto px-6 py-12">
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-8" id="casesGrid">
+
+    <!-- Case 1: Injured stray dog -->
+    <article class="card rounded-2xl overflow-hidden hover:shadow-lg transition-shadow flex flex-col">
+      <div class="aspect-[4/3] overflow-hidden bg-teal-100">
+        <img src="https://images.unsplash.com/photo-1583511655857-d19b40a7a54e?w=600&q=80" alt="Animal control officer with rescued dog" class="w-full h-full object-cover"/>
+      </div>
+      <div class="p-4 flex-1 flex flex-col">
+        <div class="flex items-center justify-between gap-2 mb-2">
+          <span class="text-xs font-bold text-teal-600">Case #1 · Dog</span>
+          <span class="sev-high text-white text-[0.65rem] font-black px-2 py-1 rounded-full uppercase">High</span>
+        </div>
+        <h3 class="font-bold text-teal-900 text-[1rem]">Injured stray dog, Downey</h3>
+        <div class="case-reporter rounded-xl p-3 mt-3 text-sm">
+          <p class="font-semibold text-teal-800">Reported by <strong>Marcus Chen</strong></p>
+          <p class="text-teal-700 mt-1.5"><strong>His actions:</strong> Saw the dog limping near a parking lot, took a clear photo from a safe distance, used Aura to report with exact GPS and description “limping, possible front leg injury.” Stayed nearby and kept people from approaching until help arrived.</p>
+          <p class="text-teal-700 mt-1.5"><strong>How it helped rescuers:</strong> Downey Animal Care Center used the photo and location to bring the right equipment and find the dog quickly. Marcus’s description helped them prepare for a possible fracture; the dog was safely captured and received treatment.</p>
+        </div>
+        <p class="text-xs font-semibold text-teal-600 mt-3 flex items-center gap-1">
+          <span class="w-1.5 h-1.5 bg-teal-500 rounded-full"></span> Rescued · Mar 2025
+        </p>
+      </div>
+    </article>
+
+    <!-- Case 2: Cat in tree -->
+    <article class="card rounded-2xl overflow-hidden hover:shadow-lg transition-shadow flex flex-col">
+      <div class="aspect-[4/3] overflow-hidden bg-teal-100">
+        <img src="assets/rescue-officer-kitten.png" alt="Animal control officer with rescued kitten" class="w-full h-full object-cover"/>
+      </div>
+      <div class="p-4 flex-1 flex flex-col">
+        <div class="flex items-center justify-between gap-2 mb-2">
+          <span class="text-xs font-bold text-teal-600">Case #2 · Cat</span>
+          <span class="sev-medium text-white text-[0.65rem] font-black px-2 py-1 rounded-full uppercase">Medium</span>
+        </div>
+        <h3 class="font-bold text-teal-900 text-[1rem]">Cat stuck in tree, Pasadena</h3>
+        <div class="case-reporter rounded-xl p-3 mt-3 text-sm">
+          <p class="font-semibold text-teal-800">Reported by <strong>Sarah Mitchell</strong></p>
+          <p class="text-teal-700 mt-1.5"><strong>Her actions:</strong> Noticed a cat about 15 feet up a tree, unable to get down. She reported via Aura with a photo and pin drop, noted “no visible injury, been there ~2 hours,” and waited at the base so the cat wouldn’t bolt when rescuers arrived.</p>
+          <p class="text-teal-700 mt-1.5"><strong>How it helped rescuers:</strong> Pasadena Humane knew exactly which tree and that the cat was stable. Sarah’s presence helped keep the cat in place; the team used a ladder and carrier and brought the cat down safely. No injuries.</p>
+        </div>
+        <p class="text-xs font-semibold text-teal-600 mt-3 flex items-center gap-1">
+          <span class="w-1.5 h-1.5 bg-teal-500 rounded-full"></span> Rescued · Mar 2025
+        </p>
+      </div>
+    </article>
+
+    <!-- Case 3: Dog hit by car -->
+    <article class="card rounded-2xl overflow-hidden hover:shadow-lg transition-shadow flex flex-col">
+      <div class="aspect-[4/3] overflow-hidden bg-teal-100">
+        <img src="https://images.unsplash.com/photo-1561037404-61cd46aa615b?w=600&q=80" alt="Rescue officer with dog after rescue" class="w-full h-full object-cover"/>
+      </div>
+      <div class="p-4 flex-1 flex flex-col">
+        <div class="flex items-center justify-between gap-2 mb-2">
+          <span class="text-xs font-bold text-teal-600">Case #3 · Dog</span>
+          <span class="sev-critical text-white text-[0.65rem] font-black px-2 py-1 rounded-full uppercase">Critical</span>
+        </div>
+        <h3 class="font-bold text-teal-900 text-[1rem]">Dog hit by car, Bell Gardens</h3>
+        <div class="case-reporter rounded-xl p-3 mt-3 text-sm">
+          <p class="font-semibold text-teal-800">Reported by <strong>David Park</strong></p>
+          <p class="text-teal-700 mt-1.5"><strong>His actions:</strong> Witnessed the collision, did not move the dog, and immediately reported via Aura with “unable to stand, bleeding from leg, conscious.” Shared live location and stayed to direct emergency responders.</p>
+          <p class="text-teal-700 mt-1.5"><strong>How it helped rescuers:</strong> Miracle Dog Rescue and a local vet were dispatched with the right gear. David’s “don’t move” note and exact spot meant the team could stabilize the dog on-site and transport without further injury. Dog is now rehabilitating.</p>
+        </div>
+        <p class="text-xs font-semibold text-teal-600 mt-3 flex items-center gap-1">
+          <span class="w-1.5 h-1.5 bg-teal-500 rounded-full"></span> Rehabilitating · Mar 2025
+        </p>
+      </div>
+    </article>
+
+    <!-- Case 4: Injured bird (wildlife) -->
+    <article class="card rounded-2xl overflow-hidden hover:shadow-lg transition-shadow flex flex-col">
+      <div class="aspect-[4/3] overflow-hidden bg-teal-100">
+        <img src="https://images.unsplash.com/photo-1529156069898-49953e39b3ac?w=600&q=80" alt="Wildlife rehabilitator with rescued bird" class="w-full h-full object-cover"/>
+      </div>
+      <div class="p-4 flex-1 flex flex-col">
+        <div class="flex items-center justify-between gap-2 mb-2">
+          <span class="text-xs font-bold text-teal-600">Case #4 · Wildlife (Bird)</span>
+          <span class="sev-high text-white text-[0.65rem] font-black px-2 py-1 rounded-full uppercase">High</span>
+        </div>
+        <h3 class="font-bold text-teal-900 text-[1rem]">Injured hawk, Pasadena</h3>
+        <div class="case-reporter rounded-xl p-3 mt-3 text-sm">
+          <p class="font-semibold text-teal-800">Reported by <strong>Elena Torres</strong></p>
+          <p class="text-teal-700 mt-1.5"><strong>Her actions:</strong> Found a large bird (hawk) on the ground, unable to fly, near a trail. She didn’t touch it, took a photo, and reported via Aura with “raptor, wing drooping, alert.” Stayed at a distance to discourage predators and people.</p>
+          <p class="text-teal-700 mt-1.5"><strong>How it helped rescuers:</strong> Aura routed to a wildlife rehab partner. The photo and “raptor” description allowed them to bring proper gloves and a carrier. Elena’s vigil kept the bird in one place; it was captured, treated for a wing injury, and later released.</p>
+        </div>
+        <p class="text-xs font-semibold text-teal-600 mt-3 flex items-center gap-1">
+          <span class="w-1.5 h-1.5 bg-teal-500 rounded-full"></span> Rehabilitated & released · Feb 2025
+        </p>
+      </div>
+    </article>
+
+    <!-- Case 5: Abandoned puppies -->
+    <article class="card rounded-2xl overflow-hidden hover:shadow-lg transition-shadow flex flex-col">
+      <div class="aspect-[4/3] overflow-hidden bg-teal-100">
+        <img src="https://images.unsplash.com/photo-1583339793403-3d9b001b6008?w=600&q=80" alt="Rescue volunteer with rescued puppies" class="w-full h-full object-cover"/>
+      </div>
+      <div class="p-4 flex-1 flex flex-col">
+        <div class="flex items-center justify-between gap-2 mb-2">
+          <span class="text-xs font-bold text-teal-600">Case #5 · Dog</span>
+          <span class="sev-high text-white text-[0.65rem] font-black px-2 py-1 rounded-full uppercase">High</span>
+        </div>
+        <h3 class="font-bold text-teal-900 text-[1rem]">Abandoned puppies, Studio City</h3>
+        <div class="case-reporter rounded-xl p-3 mt-3 text-sm">
+          <p class="font-semibold text-teal-800">Reported by <strong>Jake Williams</strong></p>
+          <p class="text-teal-700 mt-1.5"><strong>His actions:</strong> Found a box with 4 puppies left by a dumpster. He took photos, reported via Aura with location and “no food/water, eyes open, moving,” and stayed with the box in the shade until help arrived.</p>
+          <p class="text-teal-700 mt-1.5"><strong>How it helped rescuers:</strong> Hope For Paws knew to bring supplies for four neonates. Jake’s description and location made for a fast pickup; the team vaccinated and placed all four in foster. Three are already rehomed.</p>
+        </div>
+        <p class="text-xs font-semibold text-teal-600 mt-3 flex items-center gap-1">
+          <span class="w-1.5 h-1.5 bg-teal-500 rounded-full"></span> Rehomed · Feb 2025
+        </p>
+      </div>
+    </article>
+
+    <!-- Case 6: Lost cat -->
+    <article class="card rounded-2xl overflow-hidden hover:shadow-lg transition-shadow flex flex-col">
+      <div class="aspect-[4/3] overflow-hidden bg-teal-100">
+        <img src="https://images.unsplash.com/photo-1573496359143-b8d87734a5a2?w=600&q=80" alt="Rescue officer with rescued cat" class="w-full h-full object-cover"/>
+      </div>
+      <div class="p-4 flex-1 flex flex-col">
+        <div class="flex items-center justify-between gap-2 mb-2">
+          <span class="text-xs font-bold text-teal-600">Case #6 · Cat</span>
+          <span class="sev-low text-white text-[0.65rem] font-black px-2 py-1 rounded-full uppercase">Low</span>
+        </div>
+        <h3 class="font-bold text-teal-900 text-[1rem]">Lost cat, Vernon area</h3>
+        <div class="case-reporter rounded-xl p-3 mt-3 text-sm">
+          <p class="font-semibold text-teal-800">Reported by <strong>Priya Sharma</strong></p>
+          <p class="text-teal-700 mt-1.5"><strong>Her actions:</strong> Spotted a friendly cat with no collar near her building. She reported via Aura with a clear photo and “approachable, no visible injury,” and stayed nearby so the cat wouldn’t wander.</p>
+          <p class="text-teal-700 mt-1.5"><strong>How it helped rescuers:</strong> SEAACA picked up the cat and scanned for a microchip. The photo was shared on their lost-pet page; the owner saw it and was reunited the same day. Priya’s report and location made the handoff smooth.</p>
+        </div>
+        <p class="text-xs font-semibold text-teal-600 mt-3 flex items-center gap-1">
+          <span class="w-1.5 h-1.5 bg-teal-500 rounded-full"></span> Reunited · Feb 2025
+        </p>
+      </div>
+    </article>
+
+    <!-- Case 7: Fawn / deer (wildlife) -->
+    <article class="card rounded-2xl overflow-hidden hover:shadow-lg transition-shadow flex flex-col">
+      <div class="aspect-[4/3] overflow-hidden bg-teal-100">
+        <img src="https://images.unsplash.com/photo-1529156069898-49953e39b3ac?w=600&q=80" alt="Wildlife officer with rescued fawn" class="w-full h-full object-cover"/>
+      </div>
+      <div class="p-4 flex-1 flex flex-col">
+        <div class="flex items-center justify-between gap-2 mb-2">
+          <span class="text-xs font-bold text-teal-600">Case #7 · Wildlife (Deer)</span>
+          <span class="sev-medium text-white text-[0.65rem] font-black px-2 py-1 rounded-full uppercase">Medium</span>
+        </div>
+        <h3 class="font-bold text-teal-900 text-[1rem]">Fawn alone near road, Glendale</h3>
+        <div class="case-reporter rounded-xl p-3 mt-3 text-sm">
+          <p class="font-semibold text-teal-800">Reported by <strong>Ryan O’Brien</strong></p>
+          <p class="text-teal-700 mt-1.5"><strong>His actions:</strong> Saw a small fawn alone next to a busy road. He did not touch it or approach closely, took a photo, and reported via Aura with “young deer, alone, no visible injury.” Waited from his car so the fawn wouldn’t bolt into traffic.</p>
+          <p class="text-teal-700 mt-1.5"><strong>How it helped rescuers:</strong> Wildlife NGO was alerted; they knew it might be a “leave alone” case (mother nearby) or a true orphan. Ryan’s location and photo let them assess quickly. They monitored from a distance; when the mother didn’t return, they safely moved the fawn to a rehab facility.</p>
+        </div>
+        <p class="text-xs font-semibold text-teal-600 mt-3 flex items-center gap-1">
+          <span class="w-1.5 h-1.5 bg-teal-500 rounded-full"></span> In wildlife rehab · Feb 2025
+        </p>
+      </div>
+    </article>
+
+    <!-- Case 8: Malnourished dog -->
+    <article class="card rounded-2xl overflow-hidden hover:shadow-lg transition-shadow flex flex-col">
+      <div class="aspect-[4/3] overflow-hidden bg-teal-100">
+        <img src="https://images.unsplash.com/photo-1529636798458-92182a1ece9f?w=600&q=80" alt="Shelter staff with rescued dog" class="w-full h-full object-cover"/>
+      </div>
+      <div class="p-4 flex-1 flex flex-col">
+        <div class="flex items-center justify-between gap-2 mb-2">
+          <span class="text-xs font-bold text-teal-600">Case #8 · Dog</span>
+          <span class="sev-medium text-white text-[0.65rem] font-black px-2 py-1 rounded-full uppercase">Medium</span>
+        </div>
+        <h3 class="font-bold text-teal-900 text-[1rem]">Malnourished dog, Downey</h3>
+        <div class="case-reporter rounded-xl p-3 mt-3 text-sm">
+          <p class="font-semibold text-teal-800">Reported by <strong>Nina Patel</strong></p>
+          <p class="text-teal-700 mt-1.5"><strong>Her actions:</strong> Noticed an extremely thin dog in a parking lot. She didn’t offer food (to avoid stomach issues), took a photo, and reported via Aura with “very thin, weak but walking, shy.” Kept a calm presence so the dog didn’t run.</p>
+          <p class="text-teal-700 mt-1.5"><strong>How it helped rescuers:</strong> Downey Animal Care Center brought appropriate food and a gentle approach. Nina’s “shy” note meant they used slow movements; the dog was safely captured, examined, and is now in their adoption program gaining weight.</p>
+        </div>
+        <p class="text-xs font-semibold text-teal-600 mt-3 flex items-center gap-1">
+          <span class="w-1.5 h-1.5 bg-teal-500 rounded-full"></span> In care · Feb 2025
+        </p>
+      </div>
+    </article>
+
+    <!-- Case 9: Dog in hot car -->
+    <article class="card rounded-2xl overflow-hidden hover:shadow-lg transition-shadow flex flex-col">
+      <div class="aspect-[4/3] overflow-hidden bg-teal-100">
+        <img src="https://images.unsplash.com/photo-1561037404-61cd46aa615b?w=600&q=80" alt="Rescue officer with dog after hot car rescue" class="w-full h-full object-cover"/>
+      </div>
+      <div class="p-4 flex-1 flex flex-col">
+        <div class="flex items-center justify-between gap-2 mb-2">
+          <span class="text-xs font-bold text-teal-600">Case #9 · Dog</span>
+          <span class="sev-critical text-white text-[0.65rem] font-black px-2 py-1 rounded-full uppercase">Critical</span>
+        </div>
+        <h3 class="font-bold text-teal-900 text-[1rem]">Dog in hot car, Bell Gardens</h3>
+        <div class="case-reporter rounded-xl p-3 mt-3 text-sm">
+          <p class="font-semibold text-teal-800">Reported by <strong>James Liu</strong></p>
+          <p class="text-teal-700 mt-1.5"><strong>His actions:</strong> Saw a dog panting heavily in a locked car on a 90°F day. He noted the make, color, and plate, reported via Aura as critical with “dog in car, windows up, no owner in sight,” and stayed to flag down security so they could locate the owner.</p>
+          <p class="text-teal-700 mt-1.5"><strong>How it helped rescuers:</strong> Miracle Dog Rescue and local PD were dispatched. James’s vehicle description and location allowed quick arrival; the owner was paged and the dog was removed and cooled. The dog recovered fully; the incident was documented for follow-up.</p>
+        </div>
+        <p class="text-xs font-semibold text-teal-600 mt-3 flex items-center gap-1">
+          <span class="w-1.5 h-1.5 bg-teal-500 rounded-full"></span> Rescued · Jan 2025
+        </p>
+      </div>
+    </article>
+
+    <!-- Case 10: Injured owl (wildlife) -->
+    <article class="card rounded-2xl overflow-hidden hover:shadow-lg transition-shadow flex flex-col">
+      <div class="aspect-[4/3] overflow-hidden bg-teal-100">
+        <img src="https://images.unsplash.com/photo-1529156069898-49953e39b3ac?w=600&q=80" alt="Wildlife rehabilitator with rescued owl" class="w-full h-full object-cover"/>
+      </div>
+      <div class="p-4 flex-1 flex flex-col">
+        <div class="flex items-center justify-between gap-2 mb-2">
+          <span class="text-xs font-bold text-teal-600">Case #10 · Wildlife (Bird)</span>
+          <span class="sev-high text-white text-[0.65rem] font-black px-2 py-1 rounded-full uppercase">High</span>
+        </div>
+        <h3 class="font-bold text-teal-900 text-[1rem]">Injured owl, Studio City</h3>
+        <div class="case-reporter rounded-xl p-3 mt-3 text-sm">
+          <p class="font-semibold text-teal-800">Reported by <strong>Maria Santos</strong></p>
+          <p class="text-teal-700 mt-1.5"><strong>Her actions:</strong> Found a large owl on the ground under a tree at dusk. She didn’t approach (talons), took a photo from a distance, and reported via Aura with “owl, on ground, one wing lower, alert.” Kept people and pets away until help came.</p>
+          <p class="text-teal-700 mt-1.5"><strong>How it helped rescuers:</strong> Wildlife rehab was notified with “owl” and location. They brought raptor gloves and a carrier. Maria’s “one wing lower” suggested a wing injury; the owl was captured safely, treated, and later released back into the area.</p>
+        </div>
+        <p class="text-xs font-semibold text-teal-600 mt-3 flex items-center gap-1">
+          <span class="w-1.5 h-1.5 bg-teal-500 rounded-full"></span> Rehabilitated & released · Jan 2025
+        </p>
+      </div>
+    </article>
+
+  </div>
+</section>
+
+<!-- Footer -->
+<footer class="bg-white border-t teal-divider py-8 px-6 text-center mt-8">
+  <div class="max-w-5xl mx-auto">
+    <div class="flex items-center justify-center gap-2 mb-2">
+      <div class="w-7 h-7 g-teal rounded-xl flex items-center justify-center">
+        <svg class="w-3.5 h-3.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
+            d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
+        </svg>
+      </div>
+      <span class="font-extrabold text-teal-800">Aura AI</span>
+    </div>
+    <p class="text-xs text-teal-400">Powered by NVIDIA NIM · Built for Animal Rescue</p>
+    <a href="index.html" class="inline-block mt-4 text-teal-600 hover:text-teal-800 font-semibold text-sm">Report an animal in distress →</a>
+  </div>
+</footer>
+
+</body>
+</html>
