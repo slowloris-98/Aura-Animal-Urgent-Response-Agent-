@@ -309,10 +309,80 @@ document.addEventListener('DOMContentLoaded', () => {
     locationError.classList.add('hidden');
     uploadDefault.classList.remove('hidden');
     uploadPreview.classList.add('hidden');
+    
+    // Reset chat
+    currentIncidentContext = "";
+    chatMessagesHistory = [];
+    document.getElementById('chatMessages').innerHTML = '<div class="text-teal-600 italic text-center text-xs my-4">Chat started</div>';
+    
     showSection(reportSection);
   };
 
   // ── Form submit ───────────────────────────────────────────
+  let currentIncidentContext = "";
+  let chatMessagesHistory = [];
+
+  window.handleChatSubmit = async (e) => {
+    e.preventDefault();
+    const chatInput = document.getElementById('chatInput');
+    const msgText = chatInput.value.trim();
+    if (!msgText) return;
+
+    chatInput.value = '';
+    addChatMessage('user', msgText);
+    
+    // Disable input while generating
+    const submitBtn = document.getElementById('chatSubmitBtn');
+    submitBtn.disabled = true;
+    chatInput.disabled = true;
+
+    try {
+      const response = await fetch('http://127.0.0.1:8000/api/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          incident_context: currentIncidentContext,
+          messages: chatMessagesHistory
+        })
+      });
+
+      const result = await response.json();
+      if (response.ok && result.status === 'success') {
+        addChatMessage('assistant', result.reply);
+      } else {
+        showToast('Chat error: ' + (result.detail || 'Internal server error'));
+      }
+    } catch (err) {
+      console.error('Chat error:', err);
+      showToast('Could not connect to the chat service.');
+    } finally {
+      submitBtn.disabled = false;
+      chatInput.disabled = false;
+      chatInput.focus();
+    }
+  };
+
+  function addChatMessage(role, content) {
+    chatMessagesHistory.push({ role, content });
+    const chatMessagesDiv = document.getElementById('chatMessages');
+    const msgDiv = document.createElement('div');
+    msgDiv.className = `flex ${role === 'user' ? 'justify-end' : 'justify-start'}`;
+    
+    const innerDiv = document.createElement('div');
+    if (role === 'user') {
+      innerDiv.className = `max-w-[85%] p-3 rounded-2xl bg-teal-600 text-white rounded-tr-sm`;
+      innerDiv.textContent = content;
+    } else {
+      innerDiv.className = `max-w-[85%] p-3 rounded-2xl bg-white border border-teal-100 text-teal-900 rounded-tl-sm shadow-sm prose prose-sm prose-teal max-w-none`;
+      // Use marked.js to render Markdown from the LLM
+      innerDiv.innerHTML = marked.parse(content);
+    }
+    
+    msgDiv.appendChild(innerDiv);
+    chatMessagesDiv.appendChild(msgDiv);
+    chatMessagesDiv.scrollTop = chatMessagesDiv.scrollHeight;
+  }
+
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
 
@@ -355,6 +425,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const result = await response.json();
 
       if (response.ok && result.status === 'success') {
+        currentIncidentContext = `Description: ${description}. Classification: ${result.analysis.classification}. Severity: ${result.analysis.severity}. Routing: ${result.analysis.routing}.`;
         renderResults(result.analysis, result.data);
       } else {
         showSection(reportSection);

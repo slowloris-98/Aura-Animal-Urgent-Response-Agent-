@@ -6,7 +6,8 @@
   <title>Aura AI — Animal Urgent Response Agent</title>
   <link rel="preconnect" href="https://fonts.googleapis.com"/>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet"/>
-  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.tailwindcss.com?plugins=typography"></script>
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
   <script>
     tailwind.config = {
       theme: {
@@ -583,6 +584,30 @@
       </div>
 
     </div><!-- /results grid -->
+
+    <!-- Chat Interface -->
+    <div class="card rounded-3xl p-5 mt-4 lg:col-span-2 animate-slide-up" style="animation-delay:.20s" id="chatSection">
+      <div class="flex items-center gap-2.5 mb-4 border-b pb-3 border-teal-100">
+        <div class="w-7 h-7 bg-teal-50 border border-teal-100 rounded-xl flex items-center justify-center">
+          <svg class="w-4 h-4" style="color:var(--t600)" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"/>
+          </svg>
+        </div>
+        <p class="font-bold text-teal-900 text-sm">Ask Aura about this incident</p>
+      </div>
+      
+      <div id="chatMessages" class="space-y-4 mb-4 max-h-60 overflow-y-auto pr-2" style="font-size: 0.9rem;">
+        <!-- Messages will appear here -->
+        <div class="text-teal-600 italic text-center text-xs my-4">Chat started</div>
+      </div>
+      
+      <form id="chatForm" class="flex gap-2" onsubmit="handleChatSubmit(event)">
+        <input type="text" id="chatInput" class="flex-1 bg-teal-50 border border-teal-200 text-teal-900 text-sm rounded-xl focus:ring-teal-500 focus:border-teal-500 block w-full p-3" placeholder="Type your question..." required>
+        <button type="submit" id="chatSubmitBtn" class="bg-teal-600 text-white rounded-xl px-4 py-2 hover:bg-teal-700 transition flex items-center justify-center disabled:opacity-50">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+        </button>
+      </form>
+    </div>
 
     <button onclick="resetForm()"
       class="mt-4 w-full bg-white border-2 border-teal-200 text-teal-700 py-4 px-6 rounded-2xl font-bold text-sm flex items-center justify-center gap-2 hover:border-teal-400 hover:text-teal-800 active:scale-[.97] transition-all animate-slide-up"

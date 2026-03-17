@@ -6,6 +6,8 @@ from openai import OpenAI
 from dotenv import load_dotenv
 from fastapi import FastAPI, UploadFile, File, Form, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from pydantic import BaseModel
+from typing import List
 import uvicorn
 
 load_dotenv()
@@ -116,6 +118,44 @@ async def submit_report(
         }
     except json.JSONDecodeError:
         raise HTTPException(status_code=500, detail="Failed to parse AI response.")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+class ChatMessage(BaseModel):
+    role: str
+    content: str
+
+class ChatRequest(BaseModel):
+    incident_context: str
+    messages: List[ChatMessage]
+
+@app.post("/api/chat")
+async def chat_with_agent(request: ChatRequest):
+    system_prompt = f"""
+    You are Aura, an expert AI animal response agent.
+    A user has reported an animal emergency and is asking for more assistance or information.
+    Here is the context of their report:
+    {request.incident_context}
+    
+    Answer the user's questions about this incident, providing safe, calm, and helpful advice.
+    Ensure user safety first. Keep your answers concise, empathetic, and directly related to the incident context.
+    Do not use markdown blocks unless necessary, but format the text clearly.
+    """
+    
+    api_messages = [{"role": "system", "content": system_prompt}]
+    for msg in request.messages:
+        api_messages.append({"role": msg.role, "content": msg.content})
+        
+    try:
+        completion = client.chat.completions.create(
+          model=NVIDIA_MODEL_NAME, 
+          messages=api_messages,
+          temperature=0.3,
+          max_tokens=500
+        )
+        
+        reply = completion.choices[0].message.content
+        return {"status": "success", "reply": reply}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
